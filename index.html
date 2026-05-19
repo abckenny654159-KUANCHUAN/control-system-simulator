@@ -1,0 +1,1368 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>控制器調參練習器 - 線上 PID / LQR / SMC 自動控制動態模擬器</title>
+  <meta name="description" content="網頁版自動控制模擬器，提供 PID、LQR、滑模控制（SMC）及模糊控制的即時動態響應圖表。支援齊格勒－尼科爾斯（Z-N）方法調參，並提供自訂 PID 函數編寫功能。" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, "Noto Sans TC", sans-serif;
+      background: #f5f6f2;
+      color: #222;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 12px;
+      max-width: 1500px;
+      margin: auto;
+      padding: 16px;
+    }
+
+    h1 {
+      grid-column: 1 / -1;
+      margin: 0;
+      font-size: 32px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .panel {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 8px 24px #0001;
+    }
+
+    .sidebar {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .panel-head,
+    .chart-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .chart-title {
+      align-items: baseline;
+    }
+
+    label {
+      display: grid;
+      gap: 4px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: #333;
+    }
+
+    label small,
+    .note {
+      color: #777;
+      line-height: 1.35;
+      font-size: 12px;
+    }
+
+    input,
+    textarea,
+    select,
+    button {
+      font: inherit;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    input,
+    select {
+      padding: 7px;
+      min-width: 0;
+      background: white;
+    }
+
+    textarea {
+      min-height: 145px;
+      padding: 8px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      resize: vertical;
+    }
+
+    button {
+      padding: 8px 12px;
+      background: #fff;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button.primary {
+      background: #0a8c8f;
+      color: white;
+      border-color: #0a8c8f;
+    }
+
+    button.danger {
+      background: #bd4b3f;
+      color: white;
+      border-color: #bd4b3f;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .is-hidden {
+      display: none;
+    }
+
+    canvas {
+      width: 100%;
+      height: 245px;
+      display: block;
+      background: white;
+      border-radius: 6px;
+    }
+
+    #scene {
+      height: 230px;
+      background: #fbfcfa;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1px;
+      background: #ddd;
+      margin-top: 8px;
+    }
+
+    .stat {
+      background: #fff;
+      padding: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat b {
+      display: block;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .formula {
+      background: #eef5f4;
+      border: 1px solid #cddfdd;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .formula .math {
+      font-family: "Times New Roman", "Noto Serif TC", serif;
+      font-size: 20px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .term-now,
+    .zn-result {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .zn-result {
+      grid-template-columns: repeat(3, 1fr);
+      margin-top: 8px;
+    }
+
+    .term-box,
+    .zn-box {
+      background: white;
+      border: 1px solid #d7dfdd;
+      border-radius: 6px;
+      padding: 7px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .term-box b,
+    .zn-box b {
+      display: block;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .chart-value {
+      font-variant-numeric: tabular-nums;
+      color: #0a8c8f;
+      font-weight: 700;
+    }
+
+    .msg {
+      font-size: 12px;
+      color: #666;
+      margin-top: 8px;
+    }
+
+    .error {
+      color: #bd4b3f;
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .charts {
+        grid-template-columns: 1fr;
+      }
+
+      .stats,
+      .term-now,
+      .zn-result {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <h1>控制器調參練習器</h1>
+
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>控制器類型</h2>
+
+        <label style="margin-top:10px;">
+          選擇控制器
+          <select id="controllerType">
+            <option value="pid">PID 控制</option>
+            <option value="lqr">LQR 控制</option>
+            <option value="smc">滑模控制</option>
+            <option value="fuzzy">模糊控制</option>
+          </select>
+          <small>切換後會顯示該控制器的參數與公式。</small>
+        </label>
+
+        <div id="controllerMsg" class="msg">目前使用 PID 控制。</div>
+      </section>
+
+      <section class="panel">
+        <h2>目標、質點與模擬</h2>
+
+        <div class="grid" style="margin-top:10px;">
+          <label>
+            目標 X
+            <input id="target" type="number" value="0" step="0.1">
+            <small>質點要靠近的位置，預設是原點 0。</small>
+          </label>
+
+          <label>
+            初始 X
+            <input id="x0" type="number" value="6" step="0.1">
+            <small>質點一開始的位置。</small>
+          </label>
+
+          <label>
+            初始速度
+            <input id="v0" type="number" value="0" step="0.1">
+            <small>質點一開始沿 X 軸的速度。</small>
+          </label>
+
+          <label>
+            質量
+            <input id="mass" type="number" value="1" step="0.1">
+            <small>越大越不容易被控制力推動。</small>
+          </label>
+
+          <label>
+            阻尼
+            <input id="damping" type="number" value="0.2" step="0.05">
+            <small>模擬摩擦或阻力，越大越不容易震盪。</small>
+          </label>
+
+          <label>
+            dt
+            <input id="dt" type="number" value="0.01" step="0.001">
+            <small>每次模擬前進的時間。</small>
+          </label>
+
+          <label>
+            圖表秒數
+            <input id="historySec" type="number" value="20" step="1">
+            <small>圖表顯示最近幾秒資料。</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel" data-controller-panel="pid">
+        <h2>PID 參數</h2>
+
+        <div class="grid" style="margin-top:10px;">
+          <label>
+            Kp
+            <input id="kp" type="number" value="18" step="0.1">
+            <small>比例增益。越大反應越快，但太大容易過衝或震盪。</small>
+          </label>
+
+          <label>
+            Ki
+            <input id="ki" type="number" value="0" step="0.01">
+            <small>積分增益。用累積誤差修正長期偏差。</small>
+          </label>
+
+          <label>
+            Kd
+            <input id="kd" type="number" value="7" step="0.1">
+            <small>微分增益。用誤差變化率抑制震盪。</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel" data-controller-panel="lqr">
+        <h2>LQR 參數</h2>
+
+        <p class="note">
+          LQR 用狀態 x - target 與速度 v 形成回授。Q 越大代表越重視該狀態，R 越大代表越不想用太大的控制力。
+        </p>
+
+        <div class="grid" style="margin-top:10px;">
+          <label>
+            Q 位置
+            <input id="lqrQx" type="number" value="25" step="0.5">
+            <small>越大越重視位置誤差。</small>
+          </label>
+
+          <label>
+            Q 速度
+            <input id="lqrQv" type="number" value="4" step="0.5">
+            <small>越大越重視速度不要太大。</small>
+          </label>
+
+          <label>
+            R 控制力
+            <input id="lqrR" type="number" value="1" step="0.1">
+            <small>越大代表控制力越保守。</small>
+          </label>
+
+          <label>
+            輸出倍率
+            <input id="lqrScale" type="number" value="1" step="0.1">
+            <small>方便放大或縮小 LQR 輸出。</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel" data-controller-panel="smc">
+        <h2>滑模控制參數</h2>
+
+        <p class="note">
+          滑模控制先定義滑動面 s = lambda e + de/dt，再用切換項把狀態推向滑動面。邊界層越小越接近理想切換，但越容易抖振。
+        </p>
+
+        <div class="grid" style="margin-top:10px;">
+          <label>
+            lambda
+            <input id="smcLambda" type="number" value="2.5" step="0.1">
+            <small>決定滑動面斜率，越大越重視誤差。</small>
+          </label>
+
+          <label>
+            eta
+            <input id="smcEta" type="number" value="16" step="0.5">
+            <small>切換控制強度，越大越快貼近滑動面。</small>
+          </label>
+
+          <label>
+            邊界層 phi
+            <input id="smcPhi" type="number" value="0.35" step="0.05">
+            <small>越大越平滑，越小越容易看到抖振。</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel" data-controller-panel="fuzzy">
+        <h2>模糊控制參數</h2>
+
+        <p class="note">
+          模糊控制用 error 與 de/dt 的負、零、正三種語意建立 3x3 規則表，再用加權平均得到控制力。
+        </p>
+
+        <div class="grid" style="margin-top:10px;">
+          <label>
+            error 正規化
+            <input id="fuzzyEScale" type="number" value="8" step="0.5">
+            <small>error 除以此值後進入模糊規則。</small>
+          </label>
+
+          <label>
+            de/dt 正規化
+            <input id="fuzzyDScale" type="number" value="8" step="0.5">
+            <small>誤差變化率除以此值後進入模糊規則。</small>
+          </label>
+
+          <label>
+            輸出增益
+            <input id="fuzzyGain" type="number" value="42" step="1">
+            <small>模糊規則輸出的控制力倍率。</small>
+          </label>
+
+          <label>
+            速度抑制
+            <input id="fuzzyVDamp" type="number" value="2" step="0.1">
+            <small>額外加入 -kv 的速度抑制項。</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>外部擾動</h2>
+
+        <div class="grid" style="margin-top:10px;">
+          <label>
+            擾動波形
+            <select id="distType">
+              <option value="none">無</option>
+              <option value="sin">SIN 波</option>
+              <option value="cos">COS 波</option>
+              <option value="triangle">三角波</option>
+              <option value="square">方波</option>
+              <option value="noise">隨機雜訊</option>
+            </select>
+            <small>外部擾動會額外作用在質點上。</small>
+          </label>
+
+          <label>
+            擾動強度
+            <input id="distAmp" type="number" value="0" step="0.1">
+            <small>數值越大，外力干擾越明顯。</small>
+          </label>
+
+          <label>
+            擾動頻率 Hz
+            <input id="distFreq" type="number" value="0.5" step="0.1">
+            <small>SIN、COS、三角波、方波使用。</small>
+          </label>
+
+          <label>
+            雜訊更新秒數
+            <input id="noiseHold" type="number" value="0.08" step="0.01">
+            <small>隨機雜訊多久換一次值。</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel" data-controller-panel="pid">
+        <h2>齊格勒－尼科爾斯方法</h2>
+
+        <p class="note">
+          先令 Ki = 0、Kd = 0，逐漸增加 Kp，直到系統產生穩定等幅震盪。
+          此時的 Kp 稱為 Ku，震盪週期稱為 Pu。
+        </p>
+
+        <div class="grid" style="margin-top:10px;">
+          <label>
+            Ku
+            <input id="znKu" type="number" value="30" step="0.1">
+            <small>臨界增益。</small>
+          </label>
+
+          <label>
+            Pu
+            <input id="znPu" type="number" value="2" step="0.1">
+            <small>臨界震盪週期。</small>
+          </label>
+        </div>
+
+        <div class="row">
+          <button data-zn="p">套用 Z-N P</button>
+          <button data-zn="pi">套用 Z-N PI</button>
+          <button data-zn="pid">套用 Z-N PID</button>
+        </div>
+
+        <div class="zn-result">
+          <div class="zn-box"><b>Z-N Kp</b><span id="znKp">0.000</span></div>
+          <div class="zn-box"><b>Z-N Ki</b><span id="znKi">0.000</span></div>
+          <div class="zn-box"><b>Z-N Kd</b><span id="znKd">0.000</span></div>
+        </div>
+      </section>
+
+      <section class="panel" data-controller-panel="pid">
+        <h2>自訂 PID 函數</h2>
+
+        <label style="margin-top:10px;">
+          可用變數
+          <small>error, integral, derivative, x, v, t, dt, Kp, Ki, Kd</small>
+          <textarea id="code">const p = Kp * error;
+const i = Ki * integral;
+const d = Kd * derivative;
+return { force: p + i + d, p, i, d };</textarea>
+        </label>
+
+        <label>
+          <span><input id="useCustom" type="checkbox" checked> 使用自訂 PID 函數</span>
+        </label>
+
+        <div class="row">
+          <button id="applyCode">套用函數</button>
+        </div>
+
+        <div id="msg" class="msg">自訂函數已就緒。</div>
+      </section>
+    </aside>
+
+    <section>
+      <section class="panel">
+        <h2 id="formulaTitle">PID 公式與目前輸出</h2>
+
+        <div class="formula">
+          <div id="formulaMath" class="math"></div>
+
+          <div class="term-now">
+            <div class="term-box"><b id="nowLabel1">P</b><span id="nowValue1">0.000</span></div>
+            <div class="term-box"><b id="nowLabel2">I</b><span id="nowValue2">0.000</span></div>
+            <div class="term-box"><b id="nowLabel3">D</b><span id="nowValue3">0.000</span></div>
+            <div class="term-box"><b>控制力 u</b><span id="nowU">0.000</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" style="margin-top:12px;">
+        <div class="panel-head">
+          <h2>水平 X 軸質點</h2>
+
+          <div class="row">
+            <button class="primary" id="run">開始</button>
+            <button id="step">單步</button>
+            <button class="danger" id="reset">重置</button>
+            <button onclick="presetPID(18,0,7,0.2)">PID 穩定</button>
+            <button onclick="presetPID(30,0,0.8,0.05)">PID 過衝</button>
+          </div>
+        </div>
+
+        <canvas id="scene"></canvas>
+
+        <div class="stats">
+          <div class="stat"><b>t</b><span id="st">0.00</span></div>
+          <div class="stat"><b>x</b><span id="sx">0</span></div>
+          <div class="stat"><b>error</b><span id="se">0</span></div>
+          <div class="stat"><b>v</b><span id="sv">0</span></div>
+          <div class="stat"><b>控制力 u</b><span id="sf">0</span></div>
+          <div class="stat"><b>擾動 d</b><span id="sd">0</span></div>
+        </div>
+      </section>
+
+      <section class="charts">
+        <div class="panel">
+          <div class="chart-title">
+            <h2>誤差 error / 時間</h2>
+            <span class="chart-value" id="titleE">0.000</span>
+          </div>
+          <canvas id="chartE"></canvas>
+        </div>
+
+        <div class="panel">
+          <div class="chart-title">
+            <h2 id="chartTitle1">P / 時間</h2>
+            <span class="chart-value" id="title1">0.000</span>
+          </div>
+          <canvas id="chart1"></canvas>
+        </div>
+
+        <div class="panel">
+          <div class="chart-title">
+            <h2 id="chartTitle2">I / 時間</h2>
+            <span class="chart-value" id="title2">0.000</span>
+          </div>
+          <canvas id="chart2"></canvas>
+        </div>
+
+        <div class="panel">
+          <div class="chart-title">
+            <h2 id="chartTitle3">D / 時間</h2>
+            <span class="chart-value" id="title3">0.000</span>
+          </div>
+          <canvas id="chart3"></canvas>
+        </div>
+      </section>
+    </section>
+  </main>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let running = false;
+let pidFn;
+let lastFrame = 0;
+let acc = 0;
+let noiseValue = 0;
+let noiseTimer = 0;
+const FORCE_SAFETY_LIMIT = 5000;
+const STATE_SAFETY_LIMIT = 1000000;
+
+const controllerInfo = {
+  pid: {
+    message: "目前使用 PID 控制。",
+    title: "PID 公式與目前輸出",
+    math: "e(t) = target - x(t)<br>u(t) = Kp × e(t) + Ki × ∫e(t)dt + Kd × de(t)/dt",
+    labels: ["P", "I", "D"],
+    ranges: [[-250, 250], [-250, 250], [-250, 250]]
+  },
+  lqr: {
+    message: "目前使用 LQR 控制。Q 決定狀態權重，R 決定控制力成本。",
+    title: "LQR 公式與目前輸出",
+    math: "狀態 z = [x - target, v]<br>u(t) = -Kz ≈ Kx × e(t) - Kv × v(t)",
+    labels: ["位置項", "速度項", "u LQR"],
+    ranges: [[-120, 120], [-120, 120], [-120, 120]]
+  },
+  smc: {
+    message: "目前使用滑模控制。觀察滑動面 s 是否被推向 0。",
+    title: "滑模控制公式與目前輸出",
+    math: "s = lambda × e + de/dt<br>u(t) = m × lambda × de/dt + b × v + m × eta × sat(s / phi)",
+    labels: ["等效項", "切換項", "滑動面 s"],
+    ranges: [[-120, 120], [-120, 120], [-20, 20]]
+  },
+  fuzzy: {
+    message: "目前使用模糊控制。用 error 與 de/dt 的語意規則決定控制力。",
+    title: "模糊控制公式與目前輸出",
+    math: "輸入：error、de/dt<br>規則：負 / 零 / 正 × 負 / 零 / 正，使用加權平均得到 u(t)",
+    labels: ["規則輸出", "增益後", "速度抑制"],
+    ranges: [[-1, 1], [-90, 90], [-90, 90]]
+  }
+};
+
+const s = {
+  t: 0,
+  x: 6,
+  v: 0,
+  error: 0,
+  lastError: null,
+  integral: 0,
+  derivative: 0,
+  force: 0,
+  disturbance: 0,
+  term1: 0,
+  term2: 0,
+  term3: 0,
+  labels: controllerInfo.pid.labels.slice(),
+  hist: []
+};
+
+function val(id, fallback = 0) {
+  const n = Number($(id).value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function cfg() {
+  return {
+    controllerType: $("controllerType").value,
+    target: val("target"),
+    mass: Math.max(0.01, val("mass", 1)),
+    damping: Math.max(0, val("damping")),
+    dt: Math.min(0.1, Math.max(0.001, val("dt", 0.01))),
+    historySec: Math.max(2, val("historySec", 20)),
+    Kp: val("kp"),
+    Ki: val("ki"),
+    Kd: val("kd"),
+    lqrQx: Math.max(0.001, val("lqrQx", 25)),
+    lqrQv: Math.max(0.001, val("lqrQv", 4)),
+    lqrR: Math.max(0.001, val("lqrR", 1)),
+    lqrScale: val("lqrScale", 1),
+    smcLambda: Math.max(0.001, val("smcLambda", 2.5)),
+    smcEta: Math.max(0, val("smcEta", 16)),
+    smcPhi: Math.max(0.001, val("smcPhi", 0.35)),
+    fuzzyEScale: Math.max(0.001, val("fuzzyEScale", 8)),
+    fuzzyDScale: Math.max(0.001, val("fuzzyDScale", 8)),
+    fuzzyGain: val("fuzzyGain", 42),
+    fuzzyVDamp: Math.max(0, val("fuzzyVDamp", 2)),
+    distType: $("distType").value,
+    distAmp: val("distAmp"),
+    distFreq: Math.max(0, val("distFreq", 0.5)),
+    noiseHold: Math.max(0.01, val("noiseHold", 0.08))
+  };
+}
+
+function clamp(x, a, b) {
+  return Math.max(a, Math.min(b, x));
+}
+
+function safeNumber(x, fallback = 0) {
+  return Number.isFinite(x) ? x : fallback;
+}
+
+function safetyStop(message) {
+  running = false;
+  $("run").textContent = "開始";
+  $("controllerMsg").textContent = message;
+  $("controllerMsg").classList.add("error");
+}
+
+function sat(x) {
+  return clamp(x, -1, 1);
+}
+
+function fmt(x) {
+  if (!Number.isFinite(x)) return "NaN";
+  if (Math.abs(x) >= 1000 || (Math.abs(x) > 0 && Math.abs(x) < 0.001)) {
+    return x.toExponential(2);
+  }
+  return x.toFixed(3);
+}
+
+function formatTick(x) {
+  if (Math.abs(x) < 2 && x !== 0) return x.toFixed(2);
+  if (Math.abs(x) < 20) return x.toFixed(1);
+  return x.toFixed(0);
+}
+
+function triangleWave(phase) {
+  return 2 * Math.abs(2 * (phase - Math.floor(phase + 0.5))) - 1;
+}
+
+function squareWave(phase) {
+  return Math.sin(2 * Math.PI * phase) >= 0 ? 1 : -1;
+}
+
+function disturbanceAt(c, t, dt) {
+  const amp = c.distAmp;
+  const phase = c.distFreq * t;
+
+  if (c.distType === "none") return 0;
+  if (c.distType === "sin") return amp * Math.sin(2 * Math.PI * phase);
+  if (c.distType === "cos") return amp * Math.cos(2 * Math.PI * phase);
+  if (c.distType === "triangle") return amp * triangleWave(phase);
+  if (c.distType === "square") return amp * squareWave(phase);
+
+  if (c.distType === "noise") {
+    noiseTimer -= dt;
+    if (noiseTimer <= 0) {
+      noiseValue = (Math.random() * 2 - 1) * amp;
+      noiseTimer = c.noiseHold;
+    }
+    return noiseValue;
+  }
+
+  return 0;
+}
+
+function compilePID() {
+  try {
+    pidFn = new Function("ctx", `
+"use strict";
+const {error, integral, derivative, x, v, t, dt, Kp, Ki, Kd} = ctx;
+${$("code").value}
+`);
+    $("msg").textContent = "自訂函數已套用。";
+    $("msg").className = "msg";
+  } catch (e) {
+    $("msg").textContent = "語法錯誤：" + e.message;
+    $("msg").className = "msg error";
+  }
+}
+
+function reset() {
+  const c = cfg();
+  const info = controllerInfo[c.controllerType];
+
+  s.t = 0;
+  s.x = val("x0", 6);
+  s.v = val("v0", 0);
+  s.error = c.target - s.x;
+  s.lastError = null;
+  s.integral = 0;
+  s.derivative = 0;
+  s.force = 0;
+  s.disturbance = 0;
+  s.term1 = 0;
+  s.term2 = 0;
+  s.term3 = 0;
+  s.labels = info.labels.slice();
+  s.hist = [];
+  noiseValue = 0;
+  noiseTimer = 0;
+  acc = 0;
+
+  record();
+}
+
+function pidControl(c, error, derivative, dt) {
+  s.integral += error * dt;
+
+  let p = c.Kp * error;
+  let i = c.Ki * s.integral;
+  let d = c.Kd * derivative;
+  let force = p + i + d;
+
+  if ($("useCustom").checked && pidFn) {
+    try {
+      const out = pidFn({
+        error,
+        integral: s.integral,
+        derivative,
+        x: s.x,
+        v: s.v,
+        t: s.t,
+        dt,
+        Kp: c.Kp,
+        Ki: c.Ki,
+        Kd: c.Kd
+      });
+
+      if (typeof out === "number") {
+        force = out;
+      } else if (out && typeof out === "object") {
+        force = Number.isFinite(out.force) ? out.force : force;
+        p = Number.isFinite(out.p) ? out.p : p;
+        i = Number.isFinite(out.i) ? out.i : i;
+        d = Number.isFinite(out.d) ? out.d : d;
+      }
+    } catch (e) {
+      $("msg").textContent = "執行錯誤，已改用標準 PID：" + e.message;
+      $("msg").className = "msg error";
+    }
+  }
+
+  return {
+    force,
+    terms: [p, i, d],
+    labels: controllerInfo.pid.labels
+  };
+}
+
+function lqrGains(c) {
+  const kx = Math.sqrt(c.lqrQx / c.lqrR);
+  const kv = Math.sqrt((c.lqrQv + 2 * c.mass * Math.sqrt(c.lqrQx * c.lqrR)) / c.lqrR);
+  return {
+    kx: c.lqrScale * kx,
+    kv: c.lqrScale * kv
+  };
+}
+
+function lqrControl(c, error) {
+  const gains = lqrGains(c);
+  const positionTerm = gains.kx * error;
+  const velocityTerm = -gains.kv * s.v;
+  const force = positionTerm + velocityTerm;
+
+  return {
+    force,
+    terms: [positionTerm, velocityTerm, force],
+    labels: ["位置項", "速度項", "u LQR"]
+  };
+}
+
+function smcControl(c, error, derivative) {
+  const sigma = c.smcLambda * error + derivative;
+  const equivalent = c.mass * c.smcLambda * derivative + c.damping * s.v;
+  const switching = c.mass * c.smcEta * sat(sigma / c.smcPhi);
+  const force = equivalent + switching;
+
+  return {
+    force,
+    terms: [equivalent, switching, sigma],
+    labels: ["等效項", "切換項", "滑動面 s"]
+  };
+}
+
+function memberships(x) {
+  return {
+    n: clamp(-x, 0, 1),
+    z: clamp(1 - Math.abs(x), 0, 1),
+    p: clamp(x, 0, 1)
+  };
+}
+
+function fuzzyControl(c, error, derivative) {
+  const eNorm = clamp(error / c.fuzzyEScale, -1, 1);
+  const dNorm = clamp(derivative / c.fuzzyDScale, -1, 1);
+  const eMem = memberships(eNorm);
+  const dMem = memberships(dNorm);
+
+  const rows = [
+    [eMem.n, [-1.00, -0.85, -0.40]],
+    [eMem.z, [-0.55, 0.00, 0.55]],
+    [eMem.p, [0.40, 0.85, 1.00]]
+  ];
+  const cols = [dMem.n, dMem.z, dMem.p];
+
+  let weighted = 0;
+  let weightSum = 0;
+
+  rows.forEach(row => {
+    cols.forEach((colWeight, colIndex) => {
+      const w = row[0] * colWeight;
+      weighted += w * row[1][colIndex];
+      weightSum += w;
+    });
+  });
+
+  const ruleOutput = weightSum > 0 ? weighted / weightSum : 0;
+  const gainOutput = c.fuzzyGain * ruleOutput;
+  const velocityDamping = -c.fuzzyVDamp * s.v;
+  const force = gainOutput + velocityDamping;
+
+  return {
+    force,
+    terms: [ruleOutput, gainOutput, velocityDamping],
+    labels: ["規則輸出", "增益後", "速度抑制"]
+  };
+}
+
+function selectedControllerControl(c, error, derivative, dt) {
+  if (c.controllerType === "lqr") return lqrControl(c, error);
+  if (c.controllerType === "smc") return smcControl(c, error, derivative);
+  if (c.controllerType === "fuzzy") return fuzzyControl(c, error, derivative);
+  return pidControl(c, error, derivative, dt);
+}
+
+function stepSimulation(dt) {
+  const c = cfg();
+
+  const error = c.target - s.x;
+  const derivative = s.lastError === null ? 0 : (error - s.lastError) / dt;
+
+  const control = selectedControllerControl(c, error, derivative, dt);
+  const unclampedForce = safeNumber(control.force, 0);
+  const unclampedDisturbance = safeNumber(disturbanceAt(c, s.t, dt), 0);
+  const force = clamp(unclampedForce, -FORCE_SAFETY_LIMIT, FORCE_SAFETY_LIMIT);
+  const disturbance = clamp(unclampedDisturbance, -FORCE_SAFETY_LIMIT, FORCE_SAFETY_LIMIT);
+  const acceleration = (force + disturbance - c.damping * s.v) / c.mass;
+  const nextV = s.v + acceleration * dt;
+  const nextX = s.x + nextV * dt;
+
+  if (
+    !Number.isFinite(acceleration) ||
+    !Number.isFinite(nextV) ||
+    !Number.isFinite(nextX) ||
+    Math.abs(nextV) > STATE_SAFETY_LIMIT ||
+    Math.abs(nextX) > STATE_SAFETY_LIMIT
+  ) {
+    safetyStop("數值已發散，模擬已自動暫停。請降低增益、擾動強度或 dt 後再重置。");
+    return;
+  }
+
+  if (Math.abs(unclampedForce) > FORCE_SAFETY_LIMIT || Math.abs(unclampedDisturbance) > FORCE_SAFETY_LIMIT) {
+    $("controllerMsg").textContent = "控制力或擾動太大，已套用內部安全限制以避免瀏覽器重載。";
+    $("controllerMsg").classList.add("error");
+  }
+
+  s.v = nextV;
+  s.x = nextX;
+  s.t += dt;
+
+  s.error = error;
+  s.derivative = derivative;
+  s.force = force;
+  s.disturbance = disturbance;
+  s.term1 = clamp(safeNumber(control.terms[0], 0), -STATE_SAFETY_LIMIT, STATE_SAFETY_LIMIT);
+  s.term2 = clamp(safeNumber(control.terms[1], 0), -STATE_SAFETY_LIMIT, STATE_SAFETY_LIMIT);
+  s.term3 = clamp(safeNumber(control.terms[2], 0), -STATE_SAFETY_LIMIT, STATE_SAFETY_LIMIT);
+  s.labels = control.labels.slice();
+  s.lastError = error;
+
+  record();
+}
+
+function record() {
+  const c = cfg();
+
+  s.hist.push({
+    t: s.t,
+    error: s.error,
+    term1: s.term1,
+    term2: s.term2,
+    term3: s.term3
+  });
+
+  const minT = s.t - c.historySec;
+  while (s.hist.length > 2 && s.hist[0].t < minT) {
+    s.hist.shift();
+  }
+}
+
+function setupCanvas(canvas) {
+  const r = canvas.getBoundingClientRect();
+  const dpr = devicePixelRatio || 1;
+  const width = Math.max(200, Math.round(r.width * dpr));
+  const height = Math.max(120, Math.round(r.height * dpr));
+
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  return { ctx, w: r.width, h: r.height };
+}
+
+function drawScene() {
+  const { ctx, w, h } = setupCanvas($("scene"));
+  const c = cfg();
+
+  const range = 8;
+  const y = h * 0.58;
+  const left = 40;
+  const right = w - 40;
+  const toX = x => left + (x + range) / (2 * range) * (right - left);
+
+  ctx.clearRect(0, 0, w, h);
+
+  ctx.strokeStyle = "#999";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(left, y);
+  ctx.lineTo(right, y);
+  ctx.stroke();
+
+  for (let n = -8; n <= 8; n += 2) {
+    const px = toX(n);
+
+    ctx.strokeStyle = "#ddd";
+    ctx.beginPath();
+    ctx.moveTo(px, y - 8);
+    ctx.lineTo(px, y + 8);
+    ctx.stroke();
+
+    ctx.fillStyle = "#666";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(n, px, y + 14);
+  }
+
+  const targetX = toX(c.target);
+
+  ctx.strokeStyle = "#888";
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(targetX, 24);
+  ctx.lineTo(targetX, h - 30);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = "#555";
+  ctx.fillText("target", targetX, 8);
+
+  const px = clamp(toX(s.x), left, right);
+
+  ctx.fillStyle = "#0a8c8f";
+  ctx.beginPath();
+  ctx.arc(px, y, 20, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "white";
+  ctx.font = "bold 13px system-ui";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("m", px, y);
+
+  const forceArrow = Math.tanh(s.force / 80) * 70;
+  const disturbanceArrow = Math.tanh(s.disturbance / 80) * 70;
+  const velocityArrow = Math.tanh(s.v / 10) * 70;
+
+  drawArrow(ctx, px, y - 44, px + forceArrow, y - 44, "#bd4b3f", "u");
+  drawArrow(ctx, px, y - 70, px + velocityArrow, y - 70, "#3467b0", "v");
+  drawArrow(ctx, px, y - 96, px + disturbanceArrow, y - 96, "#7c8d2f", "d");
+}
+
+function drawArrow(ctx, x1, y1, x2, y2, color, label) {
+  if (Math.abs(x2 - x1) < 4) return;
+
+  const dir = x2 > x1 ? 1 : -1;
+
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 3;
+
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - dir * 9, y2 - 5);
+  ctx.lineTo(x2 - dir * 9, y2 + 5);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.font = "bold 12px system-ui";
+  ctx.textAlign = dir > 0 ? "left" : "right";
+  ctx.textBaseline = "middle";
+  ctx.fillText(label, x2 + dir * 7, y2);
+}
+
+function drawChart(canvas, getY, color, yLabel, yMin, yMax) {
+  const { ctx, w, h } = setupCanvas(canvas);
+  const c = cfg();
+
+  const pad = { l: 66, r: 14, t: 16, b: 34 };
+  const tMax = Math.max(c.historySec, s.t);
+  const tMin = Math.max(0, tMax - c.historySec);
+  const pts = s.hist.filter(p => p.t >= tMin);
+
+  const xMap = t => pad.l + (t - tMin) / (tMax - tMin) * (w - pad.l - pad.r);
+  const yMap = y => pad.t + (1 - (y - yMin) / (yMax - yMin)) * (h - pad.t - pad.b);
+
+  ctx.clearRect(0, 0, w, h);
+
+  ctx.strokeStyle = "#eee";
+  ctx.fillStyle = "#666";
+  ctx.font = "11px system-ui";
+  ctx.lineWidth = 1;
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+
+  for (let k = 0; k <= 4; k++) {
+    const value = yMin + (yMax - yMin) * k / 4;
+    const y = yMap(value);
+
+    ctx.beginPath();
+    ctx.moveTo(pad.l, y);
+    ctx.lineTo(w - pad.r, y);
+    ctx.stroke();
+
+    ctx.fillText(formatTick(value), pad.l - 8, y);
+  }
+
+  const zeroY = yMap(0);
+  if (zeroY >= pad.t && zeroY <= h - pad.b) {
+    ctx.strokeStyle = "#aaa";
+    ctx.beginPath();
+    ctx.moveTo(pad.l, zeroY);
+    ctx.lineTo(w - pad.r, zeroY);
+    ctx.stroke();
+  }
+
+  ctx.save();
+  ctx.translate(16, pad.t + (h - pad.t - pad.b) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "#333";
+  ctx.font = "12px system-ui";
+  ctx.fillText(yLabel, 0, 0);
+  ctx.restore();
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.5;
+
+  if (pts.length >= 2) {
+    ctx.beginPath();
+
+    pts.forEach((p, index) => {
+      const x = xMap(p.t);
+      const y = yMap(clamp(getY(p), yMin, yMax));
+
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = "#aaa";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(pad.l, pad.t, w - pad.l - pad.r, h - pad.t - pad.b);
+
+  ctx.fillStyle = "#666";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "top";
+  ctx.fillText("time (s)", w - pad.r, h - 22);
+}
+
+function calcZN(mode) {
+  const Ku = Math.max(0, val("znKu", 0));
+  const Pu = Math.max(0.001, val("znPu", 1));
+
+  if (mode === "p") {
+    return { Kp: 0.5 * Ku, Ki: 0, Kd: 0 };
+  }
+
+  if (mode === "pi") {
+    const Kp = 0.45 * Ku;
+    const Ti = Pu / 1.2;
+    return { Kp, Ki: Kp / Ti, Kd: 0 };
+  }
+
+  const Kp = 0.6 * Ku;
+  const Ti = Pu / 2;
+  const Td = Pu / 8;
+  return { Kp, Ki: Kp / Ti, Kd: Kp * Td };
+}
+
+function updateZNPreview(mode = "pid") {
+  const z = calcZN(mode);
+
+  $("znKp").textContent = fmt(z.Kp);
+  $("znKi").textContent = fmt(z.Ki);
+  $("znKd").textContent = fmt(z.Kd);
+}
+
+function applyZN(mode) {
+  const z = calcZN(mode);
+
+  $("kp").value = z.Kp.toFixed(4);
+  $("ki").value = z.Ki.toFixed(4);
+  $("kd").value = z.Kd.toFixed(4);
+
+  updateZNPreview(mode);
+  reset();
+}
+
+function chartRangesFor(type) {
+  return controllerInfo[type].ranges;
+}
+
+function draw() {
+  const c = cfg();
+  const ranges = chartRangesFor(c.controllerType);
+
+  drawScene();
+
+  drawChart($("chartE"), p => p.error, "#bd4b3f", "error", -10, 10);
+  drawChart($("chart1"), p => p.term1, "#3467b0", s.labels[0], ranges[0][0], ranges[0][1]);
+  drawChart($("chart2"), p => p.term2, "#7c8d2f", s.labels[1], ranges[1][0], ranges[1][1]);
+  drawChart($("chart3"), p => p.term3, "#d79b2f", s.labels[2], ranges[2][0], ranges[2][1]);
+
+  $("st").textContent = s.t.toFixed(2);
+  $("sx").textContent = fmt(s.x);
+  $("se").textContent = fmt(s.error);
+  $("sv").textContent = fmt(s.v);
+  $("sf").textContent = fmt(s.force);
+  $("sd").textContent = fmt(s.disturbance);
+
+  $("nowLabel1").textContent = s.labels[0];
+  $("nowLabel2").textContent = s.labels[1];
+  $("nowLabel3").textContent = s.labels[2];
+  $("nowValue1").textContent = fmt(s.term1);
+  $("nowValue2").textContent = fmt(s.term2);
+  $("nowValue3").textContent = fmt(s.term3);
+  $("nowU").textContent = fmt(s.force);
+
+  $("titleE").textContent = fmt(s.error);
+  $("chartTitle1").textContent = `${s.labels[0]} / 時間`;
+  $("chartTitle2").textContent = `${s.labels[1]} / 時間`;
+  $("chartTitle3").textContent = `${s.labels[2]} / 時間`;
+  $("title1").textContent = fmt(s.term1);
+  $("title2").textContent = fmt(s.term2);
+  $("title3").textContent = fmt(s.term3);
+}
+
+function updateControllerUI() {
+  const type = $("controllerType").value;
+  const info = controllerInfo[type];
+
+  document.querySelectorAll("[data-controller-panel]").forEach(panel => {
+    panel.classList.toggle("is-hidden", panel.dataset.controllerPanel !== type);
+  });
+
+  $("controllerMsg").textContent = info.message;
+  $("controllerMsg").classList.remove("error");
+  $("formulaTitle").textContent = info.title;
+  $("formulaMath").innerHTML = info.math;
+  s.labels = info.labels.slice();
+  draw();
+}
+
+function loop(now) {
+  if (!lastFrame) lastFrame = now;
+
+  const elapsed = Math.min(0.06, (now - lastFrame) / 1000);
+  lastFrame = now;
+
+  if (running) {
+    const c = cfg();
+    acc += elapsed;
+
+    while (acc >= c.dt) {
+      stepSimulation(c.dt);
+      acc -= c.dt;
+    }
+  }
+
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function presetPID(kp, ki, kd, damping) {
+  $("controllerType").value = "pid";
+  $("kp").value = kp;
+  $("ki").value = ki;
+  $("kd").value = kd;
+  $("damping").value = damping;
+  updateControllerUI();
+  reset();
+}
+
+$("run").onclick = () => {
+  running = !running;
+  $("run").textContent = running ? "暫停" : "開始";
+};
+
+$("step").onclick = () => {
+  stepSimulation(cfg().dt);
+  draw();
+};
+
+$("reset").onclick = () => {
+  running = false;
+  $("run").textContent = "開始";
+  reset();
+  draw();
+};
+
+$("applyCode").onclick = compilePID;
+
+$("controllerType").onchange = () => {
+  updateControllerUI();
+  reset();
+};
+
+document.querySelectorAll("[data-zn]").forEach(button => {
+  button.onclick = () => applyZN(button.dataset.zn);
+});
+
+$("znKu").oninput = () => updateZNPreview("pid");
+$("znPu").oninput = () => updateZNPreview("pid");
+
+compilePID();
+updateZNPreview("pid");
+updateControllerUI();
+reset();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
