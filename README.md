@@ -1,5 +1,5 @@
 **[點此直接在瀏覽器線上體驗動態模擬器](https://abckenny654159-kuanchuan.github.io/control-system-simulator/)**
-**[Click This](https://abckenny654159-kuanchuan.github.io/control-system-simulator/)**
+**[Click Here to Simulate Online](https://abckenny654159-kuanchuan.github.io/control-system-simulator/)**
 
 # Control System Simulator
 
