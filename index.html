@@ -234,6 +234,47 @@
       color: #bd4b3f;
     }
 
+    .language-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      place-items: center;
+      background: rgba(20, 25, 28, 0.48);
+      padding: 18px;
+    }
+
+    .language-modal.is-hidden {
+      display: none;
+    }
+
+    .language-card {
+      width: min(420px, 100%);
+      background: #fff;
+      border: 1px solid #d7dfdd;
+      border-radius: 8px;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.22);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .language-card h2 {
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+
+    .language-card p {
+      margin: 0 0 16px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .language-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
     @media (max-width: 980px) {
       .app {
         grid-template-columns: 1fr;
@@ -258,6 +299,17 @@
 </head>
 
 <body>
+  <div id="languageModal" class="language-modal" role="dialog" aria-modal="true" aria-labelledby="languageTitle">
+    <div class="language-card">
+      <h2 id="languageTitle">Language / 語言</h2>
+      <p>Please choose a language before entering.<br>進入頁面前請先選擇語言。</p>
+      <div class="language-actions">
+        <button class="primary" type="button" data-lang-choice="en">English</button>
+        <button type="button" data-lang-choice="zh">繁體中文</button>
+      </div>
+    </div>
+  </div>
+
   <main class="app">
     <h1>控制器調參練習器</h1>
 
@@ -622,6 +674,223 @@ return { force: p + i + d, p, i, d };</textarea>
 
 <script>
 const $ = id => document.getElementById(id);
+let currentLanguage = "zh";
+
+const staticTranslations = {
+  "控制器調參練習器": "Controller Tuning Trainer",
+  "控制器類型": "Controller Type",
+  "選擇控制器": "Select Controller",
+  "PID 控制": "PID Control",
+  "LQR 控制": "LQR Control",
+  "滑模控制": "Sliding Mode Control",
+  "滑膜控制": "Sliding Mode Control",
+  "模糊控制": "Fuzzy Control",
+  "切換後會顯示該控制器的參數與公式。": "The matching parameters and formula are shown after switching.",
+  "目前使用 PID 控制。": "Currently using PID control.",
+  "目標、質點與模擬": "Target, Particle, and Simulation",
+  "目標 X": "Target X",
+  "質點要靠近的位置，預設是原點 0。": "The position the particle should approach. Default is origin 0.",
+  "初始 X": "Initial X",
+  "質點一開始的位置。": "The particle's initial position.",
+  "初始速度": "Initial Velocity",
+  "質點一開始沿 X 軸的速度。": "The particle's initial velocity along the X axis.",
+  "質量": "Mass",
+  "越大越不容易被控制力推動。": "Larger mass is harder to move with control force.",
+  "阻尼": "Damping",
+  "模擬摩擦或阻力，越大越不容易震盪。": "Simulates friction or resistance. Larger values reduce oscillation.",
+  "每次模擬前進的時間。": "The time step for each simulation update.",
+  "圖表秒數": "Chart Window",
+  "圖表顯示最近幾秒資料。": "How many recent seconds the charts display.",
+  "PID 參數": "PID Parameters",
+  "比例增益。越大反應越快，但太大容易過衝或震盪。": "Proportional gain. Higher is faster, but too high can overshoot or oscillate.",
+  "積分增益。用累積誤差修正長期偏差。": "Integral gain. Uses accumulated error to correct long-term offset.",
+  "微分增益。用誤差變化率抑制震盪。": "Derivative gain. Uses error rate to reduce oscillation.",
+  "LQR 參數": "LQR Parameters",
+  "LQR 用狀態 x - target 與速度 v 形成回授。Q 越大代表越重視該狀態，R 越大代表越不想用太大的控制力。": "LQR feeds back the state x - target and velocity v. Larger Q emphasizes the state; larger R penalizes control force.",
+  "Q 位置": "Q Position",
+  "越大越重視位置誤差。": "Larger values emphasize position error more.",
+  "Q 速度": "Q Velocity",
+  "越大越重視速度不要太大。": "Larger values emphasize keeping velocity small.",
+  "R 控制力": "R Control Effort",
+  "越大代表控制力越保守。": "Larger values make the controller use force more conservatively.",
+  "輸出倍率": "Output Scale",
+  "方便放大或縮小 LQR 輸出。": "Scales the overall LQR output.",
+  "滑模控制參數": "Sliding Mode Parameters",
+  "滑膜控制參數": "Sliding Mode Parameters",
+  "滑膜控制先定義滑動面 s = lambda e + de/dt，再用切換項把狀態推向滑動面。邊界層越小越接近理想切換，但越容易抖振。": "Sliding mode control defines a surface s = lambda e + de/dt, then uses a switching term to drive the state toward that surface. A smaller boundary layer is closer to ideal switching but can chatter.",
+  "決定滑動面斜率，越大越重視誤差。": "Sets the sliding surface slope. Larger values emphasize error more.",
+  "切換控制強度，越大越快貼近滑動面。": "Switching strength. Larger values reach the sliding surface faster.",
+  "邊界層 phi": "Boundary Layer phi",
+  "越大越平滑，越小越容易看到抖振。": "Larger is smoother; smaller makes chattering easier to observe.",
+  "模糊控制參數": "Fuzzy Control Parameters",
+  "模糊控制用 error 與 de/dt 的負、零、正三種語意建立 3x3 規則表，再用加權平均得到控制力。": "Fuzzy control uses negative, zero, and positive meanings of error and de/dt to form a 3x3 rule table, then averages the rules into control force.",
+  "error 正規化": "Error Normalization",
+  "error 除以此值後進入模糊規則。": "Error is divided by this value before entering fuzzy rules.",
+  "de/dt 正規化": "de/dt Normalization",
+  "誤差變化率除以此值後進入模糊規則。": "Error rate is divided by this value before entering fuzzy rules.",
+  "輸出增益": "Output Gain",
+  "模糊規則輸出的控制力倍率。": "Gain applied to fuzzy rule output.",
+  "速度抑制": "Velocity Damping",
+  "額外加入 -kv 的速度抑制項。": "Adds an extra -kv velocity damping term.",
+  "外部擾動": "External Disturbance",
+  "擾動波形": "Disturbance Waveform",
+  "無": "None",
+  "SIN 波": "SIN Wave",
+  "COS 波": "COS Wave",
+  "三角波": "Triangle Wave",
+  "方波": "Square Wave",
+  "隨機雜訊": "Random Noise",
+  "外部擾動會額外作用在質點上。": "External disturbance applies an extra force to the particle.",
+  "擾動強度": "Disturbance Strength",
+  "數值越大，外力干擾越明顯。": "Larger values make the disturbance stronger.",
+  "擾動頻率 Hz": "Disturbance Frequency Hz",
+  "SIN、COS、三角波、方波使用。": "Used by SIN, COS, triangle, and square waves.",
+  "雜訊更新秒數": "Noise Update Seconds",
+  "隨機雜訊多久換一次值。": "How often random noise changes value.",
+  "齊格勒－尼科爾斯方法": "Ziegler-Nichols Method",
+  "先令 Ki = 0、Kd = 0，逐漸增加 Kp，直到系統產生穩定等幅震盪。 此時的 Kp 稱為 Ku，震盪週期稱為 Pu。": "Set Ki = 0 and Kd = 0, then gradually increase Kp until the system has sustained oscillation. That Kp is Ku, and the oscillation period is Pu.",
+  "臨界增益。": "Ultimate gain.",
+  "臨界震盪週期。": "Ultimate oscillation period.",
+  "套用 Z-N P": "Apply Z-N P",
+  "套用 Z-N PI": "Apply Z-N PI",
+  "套用 Z-N PID": "Apply Z-N PID",
+  "自訂 PID 函數": "Custom PID Function",
+  "可用變數": "Available Variables",
+  "使用自訂 PID 函數": "Use Custom PID Function",
+  "套用函數": "Apply Function",
+  "自訂函數已就緒。": "Custom function is ready.",
+  "PID 公式與目前輸出": "PID Formula and Current Output",
+  "控制力 u": "Control Force u",
+  "水平 X 軸質點": "Particle on Horizontal X Axis",
+  "開始": "Start",
+  "暫停": "Pause",
+  "單步": "Step",
+  "重置": "Reset",
+  "PID 穩定": "PID Stable",
+  "PID 過衝": "PID Overshoot",
+  "擾動 d": "Disturbance d",
+  "誤差 error / 時間": "Error / Time",
+  "P / 時間": "P / Time",
+  "I / 時間": "I / Time",
+  "D / 時間": "D / Time"
+};
+
+const uiText = {
+  zh: {
+    htmlLang: "zh-Hant",
+    pageTitle: "控制器調參練習器 - 線上 PID / LQR / SMC 自動控制動態模擬器",
+    pageDescription: "網頁版自動控制模擬器，提供 PID、LQR、滑模控制（SMC）及模糊控制的即時動態響應圖表。支援齊格勒－尼科爾斯（Z-N）方法調參，並提供自訂 PID 函數編寫功能。",
+    start: "開始",
+    pause: "暫停",
+    axisTarget: "目標",
+    timeAxis: "時間 (s)",
+    timeSuffix: " / 時間",
+    customApplied: "自訂函數已套用。",
+    syntaxError: "語法錯誤：",
+    executionError: "執行錯誤，已改用標準 PID：",
+    safetyStop: "數值已發散，模擬已自動暫停。請降低增益、擾動強度或 dt 後再重置。",
+    safetyLimit: "控制力或擾動太大，已套用內部安全限制以避免瀏覽器重載。"
+  },
+  en: {
+    htmlLang: "en",
+    pageTitle: "Controller Tuning Trainer - Online PID / LQR / SMC Control Simulator",
+    pageDescription: "A browser-based automatic control simulator with real-time dynamic response charts for PID, LQR, sliding mode control (SMC), and fuzzy control. Includes Ziegler-Nichols tuning and custom PID function editing.",
+    start: "Start",
+    pause: "Pause",
+    axisTarget: "target",
+    timeAxis: "time (s)",
+    timeSuffix: " / Time",
+    customApplied: "Custom function applied.",
+    syntaxError: "Syntax error: ",
+    executionError: "Runtime error; using standard PID instead: ",
+    safetyStop: "Numerical divergence detected. Simulation paused. Reduce gain, disturbance strength, or dt, then reset.",
+    safetyLimit: "Control force or disturbance is too large; internal safety limiting is active to avoid browser reload."
+  }
+};
+
+const controllerInfoEn = {
+  pid: {
+    message: "Currently using PID control.",
+    title: "PID Formula and Current Output",
+    math: "e(t) = target - x(t)<br>u(t) = Kp × e(t) + Ki × ∫e(t)dt + Kd × de(t)/dt",
+    labels: ["P", "I", "D"]
+  },
+  lqr: {
+    message: "Currently using LQR control. Q sets state weight; R sets control effort cost.",
+    title: "LQR Formula and Current Output",
+    math: "State z = [x - target, v]<br>u(t) = -Kz ≈ Kx × e(t) - Kv × v(t)",
+    labels: ["Position Term", "Velocity Term", "u LQR"]
+  },
+  smc: {
+    message: "Currently using sliding mode control. Watch whether the sliding surface s approaches 0.",
+    title: "Sliding Mode Formula and Current Output",
+    math: "s = lambda × e + de/dt<br>u(t) = m × lambda × de/dt + b × v + m × eta × sat(s / phi)",
+    labels: ["Equivalent Term", "Switching Term", "Sliding Surface s"]
+  },
+  fuzzy: {
+    message: "Currently using fuzzy control. Error and de/dt rules determine the control force.",
+    title: "Fuzzy Control Formula and Current Output",
+    math: "Inputs: error and de/dt<br>Rules: negative / zero / positive × negative / zero / positive, then weighted averaging gives u(t)",
+    labels: ["Rule Output", "After Gain", "Velocity Damping"]
+  }
+};
+
+const reverseStaticTranslations = Object.fromEntries(
+  Object.entries(staticTranslations).map(([zh, en]) => [en, zh])
+);
+
+function normalizeText(text) {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+function replaceTextKeepingPadding(node, nextText) {
+  const source = node.nodeValue;
+  const lead = source.match(/^\s*/)[0];
+  const trail = source.match(/\s*$/)[0];
+  node.nodeValue = lead + nextText + trail;
+}
+
+function translateStaticText(lang) {
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+
+  nodes.forEach(node => {
+    const normalized = normalizeText(node.nodeValue);
+    if (!normalized) return;
+    if (lang === "en" && staticTranslations[normalized]) {
+      replaceTextKeepingPadding(node, staticTranslations[normalized]);
+    } else if (lang === "zh" && reverseStaticTranslations[normalized]) {
+      replaceTextKeepingPadding(node, reverseStaticTranslations[normalized]);
+    }
+  });
+}
+
+function textFor(key) {
+  return uiText[currentLanguage][key] || uiText.zh[key] || key;
+}
+
+function controllerInfoFor(type) {
+  const base = controllerInfo[type];
+  if (currentLanguage === "en") {
+    return { ...base, ...controllerInfoEn[type] };
+  }
+  return base;
+}
+
+function applyLanguage(lang) {
+  currentLanguage = lang;
+  document.documentElement.lang = textFor("htmlLang");
+  document.title = textFor("pageTitle");
+  const metaDescription = document.querySelector('meta[name="description"]');
+  if (metaDescription) metaDescription.setAttribute("content", textFor("pageDescription"));
+  translateStaticText(lang);
+  $("languageModal").classList.add("is-hidden");
+  $("languageModal").style.display = "none";
+  $("run").textContent = running ? textFor("pause") : textFor("start");
+  updateControllerUI();
+  draw();
+}
 
 let running = false;
 let pidFn;
@@ -676,7 +945,7 @@ const s = {
   term1: 0,
   term2: 0,
   term3: 0,
-  labels: controllerInfo.pid.labels.slice(),
+  labels: controllerInfoFor("pid").labels.slice(),
   hist: []
 };
 
@@ -724,7 +993,7 @@ function safeNumber(x, fallback = 0) {
 
 function safetyStop(message) {
   running = false;
-  $("run").textContent = "開始";
+  $("run").textContent = textFor("start");
   $("controllerMsg").textContent = message;
   $("controllerMsg").classList.add("error");
 }
@@ -784,17 +1053,17 @@ function compilePID() {
 const {error, integral, derivative, x, v, t, dt, Kp, Ki, Kd} = ctx;
 ${$("code").value}
 `);
-    $("msg").textContent = "自訂函數已套用。";
+    $("msg").textContent = textFor("customApplied");
     $("msg").className = "msg";
   } catch (e) {
-    $("msg").textContent = "語法錯誤：" + e.message;
+    $("msg").textContent = textFor("syntaxError") + e.message;
     $("msg").className = "msg error";
   }
 }
 
 function reset() {
   const c = cfg();
-  const info = controllerInfo[c.controllerType];
+  const info = controllerInfoFor(c.controllerType);
 
   s.t = 0;
   s.x = val("x0", 6);
@@ -849,7 +1118,7 @@ function pidControl(c, error, derivative, dt) {
         d = Number.isFinite(out.d) ? out.d : d;
       }
     } catch (e) {
-      $("msg").textContent = "執行錯誤，已改用標準 PID：" + e.message;
+      $("msg").textContent = textFor("executionError") + e.message;
       $("msg").className = "msg error";
     }
   }
@@ -857,7 +1126,7 @@ function pidControl(c, error, derivative, dt) {
   return {
     force,
     terms: [p, i, d],
-    labels: controllerInfo.pid.labels
+    labels: controllerInfoFor("pid").labels
   };
 }
 
@@ -879,7 +1148,7 @@ function lqrControl(c, error) {
   return {
     force,
     terms: [positionTerm, velocityTerm, force],
-    labels: ["位置項", "速度項", "u LQR"]
+    labels: controllerInfoFor("lqr").labels
   };
 }
 
@@ -892,7 +1161,7 @@ function smcControl(c, error, derivative) {
   return {
     force,
     terms: [equivalent, switching, sigma],
-    labels: ["等效項", "切換項", "滑動面 s"]
+    labels: controllerInfoFor("smc").labels
   };
 }
 
@@ -936,7 +1205,7 @@ function fuzzyControl(c, error, derivative) {
   return {
     force,
     terms: [ruleOutput, gainOutput, velocityDamping],
-    labels: ["規則輸出", "增益後", "速度抑制"]
+    labels: controllerInfoFor("fuzzy").labels
   };
 }
 
@@ -969,12 +1238,12 @@ function stepSimulation(dt) {
     Math.abs(nextV) > STATE_SAFETY_LIMIT ||
     Math.abs(nextX) > STATE_SAFETY_LIMIT
   ) {
-    safetyStop("數值已發散，模擬已自動暫停。請降低增益、擾動強度或 dt 後再重置。");
+    safetyStop(textFor("safetyStop"));
     return;
   }
 
   if (Math.abs(unclampedForce) > FORCE_SAFETY_LIMIT || Math.abs(unclampedDisturbance) > FORCE_SAFETY_LIMIT) {
-    $("controllerMsg").textContent = "控制力或擾動太大，已套用內部安全限制以避免瀏覽器重載。";
+    $("controllerMsg").textContent = textFor("safetyLimit");
     $("controllerMsg").classList.add("error");
   }
 
@@ -1074,7 +1343,7 @@ function drawScene() {
   ctx.setLineDash([]);
 
   ctx.fillStyle = "#555";
-  ctx.fillText("target", targetX, 8);
+  ctx.fillText(textFor("axisTarget"), targetX, 8);
 
   const px = clamp(toX(s.x), left, right);
 
@@ -1201,7 +1470,7 @@ function drawChart(canvas, getY, color, yLabel, yMin, yMax) {
   ctx.fillStyle = "#666";
   ctx.textAlign = "right";
   ctx.textBaseline = "top";
-  ctx.fillText("time (s)", w - pad.r, h - 22);
+  ctx.fillText(textFor("timeAxis"), w - pad.r, h - 22);
 }
 
 function calcZN(mode) {
@@ -1274,9 +1543,9 @@ function draw() {
   $("nowU").textContent = fmt(s.force);
 
   $("titleE").textContent = fmt(s.error);
-  $("chartTitle1").textContent = `${s.labels[0]} / 時間`;
-  $("chartTitle2").textContent = `${s.labels[1]} / 時間`;
-  $("chartTitle3").textContent = `${s.labels[2]} / 時間`;
+  $("chartTitle1").textContent = `${s.labels[0]}${textFor("timeSuffix")}`;
+  $("chartTitle2").textContent = `${s.labels[1]}${textFor("timeSuffix")}`;
+  $("chartTitle3").textContent = `${s.labels[2]}${textFor("timeSuffix")}`;
   $("title1").textContent = fmt(s.term1);
   $("title2").textContent = fmt(s.term2);
   $("title3").textContent = fmt(s.term3);
@@ -1284,7 +1553,7 @@ function draw() {
 
 function updateControllerUI() {
   const type = $("controllerType").value;
-  const info = controllerInfo[type];
+  const info = controllerInfoFor(type);
 
   document.querySelectorAll("[data-controller-panel]").forEach(panel => {
     panel.classList.toggle("is-hidden", panel.dataset.controllerPanel !== type);
@@ -1330,7 +1599,7 @@ function presetPID(kp, ki, kd, damping) {
 
 $("run").onclick = () => {
   running = !running;
-  $("run").textContent = running ? "暫停" : "開始";
+  $("run").textContent = running ? textFor("pause") : textFor("start");
 };
 
 $("step").onclick = () => {
@@ -1340,7 +1609,7 @@ $("step").onclick = () => {
 
 $("reset").onclick = () => {
   running = false;
-  $("run").textContent = "開始";
+  $("run").textContent = textFor("start");
   reset();
   draw();
 };
@@ -1354,6 +1623,10 @@ $("controllerType").onchange = () => {
 
 document.querySelectorAll("[data-zn]").forEach(button => {
   button.onclick = () => applyZN(button.dataset.zn);
+});
+
+document.querySelectorAll("[data-lang-choice]").forEach(button => {
+  button.onclick = () => applyLanguage(button.dataset.langChoice);
 });
 
 $("znKu").oninput = () => updateZNPreview("pid");
