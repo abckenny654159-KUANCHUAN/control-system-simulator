@@ -168,6 +168,22 @@
       font-size: 12px;
     }
 
+    .metrics-heading {
+      margin: 14px 0 0;
+      font-size: 15px;
+    }
+
+    .response-metrics {
+      margin-top: 6px;
+    }
+
+    .metrics-note {
+      margin-top: 6px;
+      color: #777;
+      line-height: 1.35;
+      font-size: 12px;
+    }
+
     .formula {
       background: #eef5f4;
       border: 1px solid #cddfdd;
@@ -634,6 +650,17 @@ return { force: p + i + d, p, i, d };</textarea>
           <div class="stat"><b>控制力 u</b><span id="sf">0</span></div>
           <div class="stat"><b>擾動 d</b><span id="sd">0</span></div>
         </div>
+
+        <h3 class="metrics-heading">響應評比（即時估算）</h3>
+        <div class="stats response-metrics">
+          <div class="stat"><b>上升時間 Tr（10–90%）</b><span id="metricRise">—</span></div>
+          <div class="stat"><b>安定時間 Ts（±2%）</b><span id="metricSettling">—</span></div>
+          <div class="stat"><b>最大超越量 Mp</b><span id="metricOvershoot">0.00%</span></div>
+          <div class="stat"><b>峰值時間 Tp</b><span id="metricPeak">—</span></div>
+          <div class="stat"><b>穩態誤差 |ess|</b><span id="metricSteadyError">0.000</span></div>
+          <div class="stat"><b>絕對誤差積分 IAE</b><span id="metricIAE">0.000</span></div>
+        </div>
+        <div class="metrics-note">依目前資料即時估算；目標值變更時會重新計算，安定時間若再次離開 ±2% 範圍也會更新。</div>
       </section>
 
       <section class="charts">
@@ -772,7 +799,15 @@ const staticTranslations = {
   "誤差 error / 時間": "Error / Time",
   "P / 時間": "P / Time",
   "I / 時間": "I / Time",
-  "D / 時間": "D / Time"
+  "D / 時間": "D / Time",
+  "響應評比（即時估算）": "Response Metrics (Live Estimate)",
+  "上升時間 Tr（10–90%）": "Rise Time Tr (10–90%)",
+  "安定時間 Ts（±2%）": "Settling Time Ts (±2%)",
+  "最大超越量 Mp": "Maximum Overshoot Mp",
+  "峰值時間 Tp": "Peak Time Tp",
+  "穩態誤差 |ess|": "Steady-State Error |ess|",
+  "絕對誤差積分 IAE": "Integral Absolute Error IAE",
+  "依目前資料即時估算；目標值變更時會重新計算，安定時間若再次離開 ±2% 範圍也會更新。": "Estimated from current simulation data. Metrics restart when the target changes, and settling time updates if the response leaves the ±2% band again."
 };
 
 const uiText = {
@@ -900,6 +935,8 @@ let noiseValue = 0;
 let noiseTimer = 0;
 const FORCE_SAFETY_LIMIT = 5000;
 const STATE_SAFETY_LIMIT = 1000000;
+const RESPONSE_EPSILON = 1e-9;
+const STEADY_ERROR_WINDOW_SEC = 1;
 
 const controllerInfo = {
   pid: {
@@ -946,6 +983,7 @@ const s = {
   term2: 0,
   term3: 0,
   labels: controllerInfoFor("pid").labels.slice(),
+  metric: null,
   hist: []
 };
 
@@ -1016,6 +1054,148 @@ function formatTick(x) {
   return x.toFixed(0);
 }
 
+function formatTimeTick(x, span) {
+  if (span <= 2) return x.toFixed(2);
+  if (span <= 20) return x.toFixed(1);
+  return x.toFixed(0);
+}
+
+function resetResponseMetrics(target, startX = s.x, startTime = s.t) {
+  const initialError = target - startX;
+  const amplitude = target - startX;
+  const settlingBand = Math.max(0.02 * Math.abs(amplitude), RESPONSE_EPSILON);
+
+  s.metric = {
+    target,
+    startX,
+    startTime,
+    lastProgress: 0,
+    lastSampleTime: 0,
+    rise10Time: null,
+    rise90Time: null,
+    maxProgress: 0,
+    peakTime: null,
+    lastOutsideSettlingTime: 0,
+    insideSettlingBand: Math.abs(initialError) <= settlingBand,
+    iae: 0,
+    lastAbsError: Math.abs(initialError),
+    recentErrors: [{ t: startTime, error: initialError }],
+    recentErrorSum: initialError
+  };
+}
+
+function ensureResponseMetricTarget(target) {
+  if (!s.metric || Math.abs(s.metric.target - target) > RESPONSE_EPSILON) {
+    resetResponseMetrics(target, s.x, s.t);
+  }
+}
+
+function crossingTime(previousValue, currentValue, threshold, previousTime, currentTime) {
+  if (previousValue >= threshold || currentValue < threshold) return null;
+
+  const delta = currentValue - previousValue;
+  if (Math.abs(delta) <= RESPONSE_EPSILON) return currentTime;
+
+  const ratio = clamp((threshold - previousValue) / delta, 0, 1);
+  return previousTime + ratio * (currentTime - previousTime);
+}
+
+function updateResponseMetrics(target, dt) {
+  ensureResponseMetricTarget(target);
+
+  const metric = s.metric;
+  const elapsed = Math.max(0, s.t - metric.startTime);
+  const amplitude = metric.target - metric.startX;
+  const error = metric.target - s.x;
+  const absError = Math.abs(error);
+
+  metric.iae += 0.5 * (metric.lastAbsError + absError) * dt;
+  metric.lastAbsError = absError;
+
+  metric.recentErrors.push({ t: s.t, error });
+  metric.recentErrorSum += error;
+
+  const recentMinTime = s.t - STEADY_ERROR_WINDOW_SEC;
+  while (metric.recentErrors.length > 1 && metric.recentErrors[0].t < recentMinTime) {
+    metric.recentErrorSum -= metric.recentErrors[0].error;
+    metric.recentErrors.shift();
+  }
+
+  if (Math.abs(amplitude) <= RESPONSE_EPSILON) {
+    metric.insideSettlingBand = true;
+    metric.lastOutsideSettlingTime = 0;
+    metric.lastSampleTime = elapsed;
+    return;
+  }
+
+  const progress = (s.x - metric.startX) / amplitude;
+
+  if (metric.rise10Time === null) {
+    metric.rise10Time = crossingTime(
+      metric.lastProgress,
+      progress,
+      0.1,
+      metric.lastSampleTime,
+      elapsed
+    );
+  }
+
+  if (metric.rise90Time === null) {
+    metric.rise90Time = crossingTime(
+      metric.lastProgress,
+      progress,
+      0.9,
+      metric.lastSampleTime,
+      elapsed
+    );
+  }
+
+  if (progress > metric.maxProgress) {
+    metric.maxProgress = progress;
+    metric.peakTime = elapsed;
+  }
+
+  const settlingBand = 0.02 * Math.abs(amplitude);
+  if (absError > settlingBand) {
+    metric.lastOutsideSettlingTime = elapsed;
+    metric.insideSettlingBand = false;
+  } else {
+    metric.insideSettlingBand = true;
+  }
+
+  metric.lastProgress = progress;
+  metric.lastSampleTime = elapsed;
+}
+
+function getResponseMetrics(target) {
+  ensureResponseMetricTarget(target);
+
+  const metric = s.metric;
+  const amplitude = metric.target - metric.startX;
+  const overshoot = Math.max(0, (metric.maxProgress - 1) * 100);
+  const recentCount = metric.recentErrors.length;
+  const steadyStateError = recentCount > 0
+    ? Math.abs(metric.recentErrorSum / recentCount)
+    : Math.abs(metric.target - s.x);
+
+  return {
+    riseTime: metric.rise10Time !== null && metric.rise90Time !== null
+      ? Math.max(0, metric.rise90Time - metric.rise10Time)
+      : null,
+    settlingTime: Math.abs(amplitude) <= RESPONSE_EPSILON
+      ? 0
+      : (metric.insideSettlingBand ? metric.lastOutsideSettlingTime : null),
+    overshoot,
+    peakTime: overshoot > RESPONSE_EPSILON ? metric.peakTime : null,
+    steadyStateError,
+    iae: metric.iae
+  };
+}
+
+function formatMetricSeconds(value) {
+  return Number.isFinite(value) ? `${value.toFixed(3)} s` : "—";
+}
+
 function triangleWave(phase) {
   return 2 * Math.abs(2 * (phase - Math.floor(phase + 0.5))) - 1;
 }
@@ -1078,7 +1258,9 @@ function reset() {
   s.term2 = 0;
   s.term3 = 0;
   s.labels = info.labels.slice();
+  s.metric = null;
   s.hist = [];
+  resetResponseMetrics(c.target, s.x, s.t);
   noiseValue = 0;
   noiseTimer = 0;
   acc = 0;
@@ -1218,6 +1400,7 @@ function selectedControllerControl(c, error, derivative, dt) {
 
 function stepSimulation(dt) {
   const c = cfg();
+  ensureResponseMetricTarget(c.target);
 
   const error = c.target - s.x;
   const derivative = s.lastError === null ? 0 : (error - s.lastError) / dt;
@@ -1261,6 +1444,7 @@ function stepSimulation(dt) {
   s.labels = control.labels.slice();
   s.lastError = error;
 
+  updateResponseMetrics(c.target, dt);
   record();
 }
 
@@ -1398,7 +1582,7 @@ function drawChart(canvas, getY, color, yLabel, yMin, yMax) {
   const { ctx, w, h } = setupCanvas(canvas);
   const c = cfg();
 
-  const pad = { l: 66, r: 14, t: 16, b: 34 };
+  const pad = { l: 66, r: 14, t: 16, b: 44 };
   const tMax = Math.max(c.historySec, s.t);
   const tMin = Math.max(0, tMax - c.historySec);
   const pts = s.hist.filter(p => p.t >= tMin);
@@ -1425,6 +1609,24 @@ function drawChart(canvas, getY, color, yLabel, yMin, yMax) {
     ctx.stroke();
 
     ctx.fillText(formatTick(value), pad.l - 8, y);
+  }
+
+  const timeSpan = tMax - tMin;
+  ctx.textBaseline = "top";
+
+  for (let k = 0; k <= 5; k++) {
+    const timeValue = tMin + timeSpan * k / 5;
+    const x = xMap(timeValue);
+
+    ctx.strokeStyle = "#eee";
+    ctx.beginPath();
+    ctx.moveTo(x, pad.t);
+    ctx.lineTo(x, h - pad.b);
+    ctx.stroke();
+
+    ctx.fillStyle = "#666";
+    ctx.textAlign = k === 0 ? "left" : (k === 5 ? "right" : "center");
+    ctx.fillText(formatTimeTick(timeValue, timeSpan), x, h - pad.b + 7);
   }
 
   const zeroY = yMap(0);
@@ -1470,7 +1672,7 @@ function drawChart(canvas, getY, color, yLabel, yMin, yMax) {
   ctx.fillStyle = "#666";
   ctx.textAlign = "right";
   ctx.textBaseline = "top";
-  ctx.fillText(textFor("timeAxis"), w - pad.r, h - 22);
+  ctx.fillText(textFor("timeAxis"), w - pad.r, h - 17);
 }
 
 function calcZN(mode) {
@@ -1519,6 +1721,7 @@ function chartRangesFor(type) {
 function draw() {
   const c = cfg();
   const ranges = chartRangesFor(c.controllerType);
+  const metrics = getResponseMetrics(c.target);
 
   drawScene();
 
@@ -1533,6 +1736,13 @@ function draw() {
   $("sv").textContent = fmt(s.v);
   $("sf").textContent = fmt(s.force);
   $("sd").textContent = fmt(s.disturbance);
+
+  $("metricRise").textContent = formatMetricSeconds(metrics.riseTime);
+  $("metricSettling").textContent = formatMetricSeconds(metrics.settlingTime);
+  $("metricOvershoot").textContent = `${metrics.overshoot.toFixed(2)}%`;
+  $("metricPeak").textContent = formatMetricSeconds(metrics.peakTime);
+  $("metricSteadyError").textContent = fmt(metrics.steadyStateError);
+  $("metricIAE").textContent = fmt(metrics.iae);
 
   $("nowLabel1").textContent = s.labels[0];
   $("nowLabel2").textContent = s.labels[1];
