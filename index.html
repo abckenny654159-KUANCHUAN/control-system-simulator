@@ -9,7 +9,7 @@
   <style>
     body {
       margin: 0;
-      font-family: system-ui, "Noto Sans TC", sans-serif;
+      font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
       background: #f5f6f2;
       color: #222;
     }
@@ -95,7 +95,7 @@
     textarea {
       min-height: 145px;
       padding: 8px;
-      font-family: Consolas, monospace;
+      font-family: Consolas, "Microsoft JhengHei", "微軟正黑體", monospace;
       font-size: 13px;
       resize: vertical;
     }
@@ -193,7 +193,7 @@
     }
 
     .formula .math {
-      font-family: "Times New Roman", "Noto Serif TC", serif;
+      font-family: "Times New Roman", "Microsoft JhengHei", "微軟正黑體", serif;
       font-size: 20px;
       line-height: 1.5;
       margin-bottom: 8px;
@@ -238,6 +238,186 @@
       font-variant-numeric: tabular-nums;
       color: #0a8c8f;
       font-weight: 700;
+    }
+
+    .chart-panel .chart-title,
+    .chart-panel .panel-head {
+      margin-bottom: 0;
+    }
+
+    .chart-body {
+      margin-top: 10px;
+    }
+
+    .chart-body[hidden] {
+      display: none;
+    }
+
+    .chart-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-left: auto;
+      padding: 5px 9px;
+      color: #356665;
+      border-color: #b9d3d1;
+      background: #f3f8f7;
+      font-size: 12px;
+    }
+
+    .chart-toggle:hover,
+    .chart-toggle:focus-visible {
+      color: #075f62;
+      border-color: #0a8c8f;
+      outline: none;
+    }
+
+    .chart-toggle-icon {
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .analysis-canvas {
+      height: 370px;
+    }
+
+    .chart-tools {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      margin-bottom: 8px;
+    }
+
+    .chart-tools .check-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+      color: #333;
+      cursor: pointer;
+    }
+
+    .chart-tools input[type="checkbox"] {
+      margin: 0;
+    }
+
+    .analysis-note {
+      margin: 8px 0 0;
+      color: #666;
+      line-height: 1.45;
+      font-size: 12px;
+    }
+
+    .model-equations {
+      display: grid;
+      gap: 10px;
+      padding: 11px;
+      margin-top: 8px;
+      color: #356665;
+      background: #f3f8f7;
+      border: 1px solid #d7e5e3;
+      border-radius: 6px;
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    .model-equations b {
+      color: #244847;
+      font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+      font-size: 12px;
+    }
+
+    .transfer-block {
+      display: grid;
+      gap: 6px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #d7e5e3;
+    }
+
+    .transfer-block:last-of-type {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .display-equation {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      color: #203f3e;
+      font-family: "Cambria Math", "Times New Roman", serif;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .fraction {
+      display: inline-grid;
+      grid-template-rows: auto auto;
+      min-width: 72px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .fraction > span:first-child {
+      padding: 0 6px 3px;
+      border-bottom: 1.5px solid currentColor;
+    }
+
+    .fraction > span:last-child {
+      padding: 3px 6px 0;
+    }
+
+    .equation-definition {
+      color: #58716f;
+      font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+      font-size: 13px;
+    }
+
+    .equation-note {
+      color: #5f706f;
+      font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .bode-margins {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .margin-card {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: baseline;
+      gap: 4px 10px;
+      padding: 8px 10px;
+      background: #f7f9f8;
+      border: 1px solid #dde5e3;
+      border-radius: 6px;
+    }
+
+    .margin-card b {
+      color: #526361;
+      font-size: 12px;
+    }
+
+    .margin-value {
+      color: #0a8c8f;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .margin-frequency {
+      grid-column: 1 / -1;
+      color: #777;
+      font-size: 11px;
+      text-align: right;
     }
 
     .msg {
@@ -302,7 +482,8 @@
 
       .stats,
       .term-now,
-      .zn-result {
+      .zn-result,
+      .bode-margins {
         grid-template-columns: 1fr;
       }
 
@@ -696,11 +877,53 @@ return { force: p + i + d, p, i, d };</textarea>
           <canvas id="chart3"></canvas>
         </div>
       </section>
+
+      <section class="charts analysis-charts">
+        <div class="panel">
+          <div class="chart-title">
+            <h2>波德圖</h2>
+            <span class="chart-value">開迴路頻率響應</span>
+          </div>
+          <div class="bode-margins" aria-label="穩定裕度">
+            <div class="margin-card">
+              <b>相位裕度 PM</b>
+              <span class="margin-value" id="phaseMarginValue">—</span>
+              <span class="margin-frequency" id="phaseMarginFrequency">—</span>
+            </div>
+            <div class="margin-card">
+              <b>增益裕度 GM</b>
+              <span class="margin-value" id="gainMarginValue">—</span>
+              <span class="margin-frequency" id="gainMarginFrequency">—</span>
+            </div>
+          </div>
+          <canvas id="bodeChart" class="analysis-canvas"></canvas>
+          <p class="analysis-note">幅值顯示系統對不同頻率的放大或衰減，0 dB 是增益交越基準；相位則呈現輸出相對輸入的延遲。</p>
+          <div class="model-equations" id="analysisModelBode"></div>
+        </div>
+
+        <div class="panel">
+          <div class="chart-title">
+            <h2>極點零點圖</h2>
+            <span class="chart-value">s 平面</span>
+          </div>
+          <div class="chart-tools">
+            <label class="check-inline">
+              <input id="rootLocusTrail" type="checkbox" checked>
+              <span>紀錄根軌跡（掃描迴路增益 K）</span>
+            </label>
+            <span class="note">× 極點　○ 零點　◆ 閉迴路極點　— 根軌跡</span>
+          </div>
+          <canvas id="poleZeroChart" class="analysis-canvas"></canvas>
+          <p class="analysis-note">閉迴路極點位於左半平面代表線性化模型穩定；越靠近虛軸，響應通常越慢或越容易振盪。</p>
+          <div class="model-equations" id="analysisModelPoleZero"></div>
+        </div>
+      </section>
     </section>
   </main>
 
 <script>
 const $ = id => document.getElementById(id);
+const UI_FONT_FAMILY = '"Microsoft JhengHei", "微軟正黑體", sans-serif';
 let currentLanguage = "zh";
 
 const staticTranslations = {
@@ -807,7 +1030,17 @@ const staticTranslations = {
   "峰值時間 Tp": "Peak Time Tp",
   "穩態誤差 |ess|": "Steady-State Error |ess|",
   "絕對誤差積分 IAE": "Integral Absolute Error IAE",
-  "依目前資料即時估算；目標值變更時會重新計算，安定時間若再次離開 ±2% 範圍也會更新。": "Estimated from current simulation data. Metrics restart when the target changes, and settling time updates if the response leaves the ±2% band again."
+  "依目前資料即時估算；目標值變更時會重新計算，安定時間若再次離開 ±2% 範圍也會更新。": "Estimated from current simulation data. Metrics restart when the target changes, and settling time updates if the response leaves the ±2% band again.",
+  "波德圖": "Bode Plot",
+  "開迴路頻率響應": "Open-Loop Frequency Response",
+  "幅值顯示系統對不同頻率的放大或衰減，0 dB 是增益交越基準；相位則呈現輸出相對輸入的延遲。": "Magnitude shows amplification or attenuation across frequency; 0 dB is the gain-crossover reference. Phase shows output lag relative to input.",
+  "相位裕度 PM": "Phase Margin PM",
+  "增益裕度 GM": "Gain Margin GM",
+  "極點零點圖": "Pole-Zero Plot",
+  "s 平面": "s-plane",
+  "紀錄根軌跡（掃描迴路增益 K）": "Trace Root Locus (Sweep Loop Gain K)",
+  "× 極點 ○ 零點 ◆ 閉迴路極點 — 根軌跡": "× Poles ○ Zeros ◆ Closed-Loop Poles — Root Locus",
+  "閉迴路極點位於左半平面代表線性化模型穩定；越靠近虛軸，響應通常越慢或越容易振盪。": "Closed-loop poles in the left half-plane indicate a stable linearized model. Poles nearer the imaginary axis usually mean slower or more oscillatory response."
 };
 
 const uiText = {
@@ -824,7 +1057,29 @@ const uiText = {
     syntaxError: "語法錯誤：",
     executionError: "執行錯誤，已改用標準 PID：",
     safetyStop: "數值已發散，模擬已自動暫停。請降低增益、擾動強度或 dt 後再重置。",
-    safetyLimit: "控制力或擾動太大，已套用內部安全限制以避免瀏覽器重載。"
+    safetyLimit: "控制力或擾動太大，已套用內部安全限制以避免瀏覽器重載。",
+    collapseChart: "收起圖表",
+    expandChart: "展開圖表",
+    frequencyAxis: "頻率 ω (rad/s)",
+    magnitudeAxis: "幅值 (dB)",
+    phaseAxis: "相位 (deg)",
+    realAxis: "實軸 Re(s)",
+    imaginaryAxis: "虛軸 Im(s)",
+    exactModel: "精確線性模型",
+    linearizedModel: "目前參數的局部線性化模型",
+    openLoopLabel: "開迴路",
+    equivalentOpenLoopLabel: "等效開迴路",
+    closedLoopLabel: "閉迴路（參考輸入 R 到位置 X）",
+    pidAnalysisNote: "以目前 PID 係數建立；若自訂 PID 函數含有非線性或額外邏輯，此線性圖形不再代表自訂程式。",
+    lqrAnalysisNote: "此線性質量－阻尼模型中，LQR 等價於位置與速度狀態回授；閉迴路式使用模擬器實際的參考輸入路徑。",
+    nonlinearAnalysisNote: "這是平衡點附近的小訊號近似，只適合觀察局部趨勢，不能作為全域非線性穩定性的證明。"
+    ,
+    atGainCrossover: "增益交越頻率 ωgc",
+    atPhaseCrossover: "相位交越頻率 ωpc",
+    noGainCrossover: "掃描範圍內沒有 0 dB 增益交越",
+    noPhaseCrossover: "掃描範圍內沒有 −180° 相位交越",
+    openLoopDefinition: "等效控制器與受控體的乘積",
+    closedLoopDefinition: "由參考輸入 R(s) 到位置輸出 X(s)"
   },
   en: {
     htmlLang: "en",
@@ -839,7 +1094,29 @@ const uiText = {
     syntaxError: "Syntax error: ",
     executionError: "Runtime error; using standard PID instead: ",
     safetyStop: "Numerical divergence detected. Simulation paused. Reduce gain, disturbance strength, or dt, then reset.",
-    safetyLimit: "Control force or disturbance is too large; internal safety limiting is active to avoid browser reload."
+    safetyLimit: "Control force or disturbance is too large; internal safety limiting is active to avoid browser reload.",
+    collapseChart: "Collapse Chart",
+    expandChart: "Expand Chart",
+    frequencyAxis: "frequency ω (rad/s)",
+    magnitudeAxis: "magnitude (dB)",
+    phaseAxis: "phase (deg)",
+    realAxis: "real axis Re(s)",
+    imaginaryAxis: "imaginary axis Im(s)",
+    exactModel: "exact linear model",
+    linearizedModel: "local linearized model at current parameters",
+    openLoopLabel: "Open loop",
+    equivalentOpenLoopLabel: "Equivalent open loop",
+    closedLoopLabel: "Closed loop (reference R to position X)",
+    pidAnalysisNote: "Built from the current PID gains. If the custom PID function adds nonlinear or extra logic, this linear plot no longer represents that custom code.",
+    lqrAnalysisNote: "For this linear mass-damper plant, LQR is equivalent to position and velocity state feedback. The closed-loop expression follows the simulator's actual reference path.",
+    nonlinearAnalysisNote: "This is a small-signal approximation near equilibrium. It shows local trends and is not proof of global nonlinear stability."
+    ,
+    atGainCrossover: "Gain crossover frequency ωgc",
+    atPhaseCrossover: "Phase crossover frequency ωpc",
+    noGainCrossover: "No 0 dB gain crossover in the scanned range",
+    noPhaseCrossover: "No −180° phase crossover in the scanned range",
+    openLoopDefinition: "Product of the equivalent controller and plant",
+    closedLoopDefinition: "From reference input R(s) to position output X(s)"
   }
 };
 
@@ -924,6 +1201,7 @@ function applyLanguage(lang) {
   $("languageModal").style.display = "none";
   $("run").textContent = running ? textFor("pause") : textFor("start");
   updateControllerUI();
+  updateCollapseButtons();
   draw();
 }
 
@@ -1537,7 +1815,7 @@ function drawScene() {
   ctx.fill();
 
   ctx.fillStyle = "white";
-  ctx.font = "bold 13px system-ui";
+  ctx.font = `bold 13px ${UI_FONT_FAMILY}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("m", px, y);
@@ -1572,7 +1850,7 @@ function drawArrow(ctx, x1, y1, x2, y2, color, label) {
   ctx.closePath();
   ctx.fill();
 
-  ctx.font = "bold 12px system-ui";
+  ctx.font = `bold 12px ${UI_FONT_FAMILY}`;
   ctx.textAlign = dir > 0 ? "left" : "right";
   ctx.textBaseline = "middle";
   ctx.fillText(label, x2 + dir * 7, y2);
@@ -1594,7 +1872,7 @@ function drawChart(canvas, getY, color, yLabel, yMin, yMax) {
 
   ctx.strokeStyle = "#eee";
   ctx.fillStyle = "#666";
-  ctx.font = "11px system-ui";
+  ctx.font = `11px ${UI_FONT_FAMILY}`;
   ctx.lineWidth = 1;
   ctx.textAlign = "right";
   ctx.textBaseline = "middle";
@@ -1644,7 +1922,7 @@ function drawChart(canvas, getY, color, yLabel, yMin, yMax) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = "#333";
-  ctx.font = "12px system-ui";
+  ctx.font = `12px ${UI_FONT_FAMILY}`;
   ctx.fillText(yLabel, 0, 0);
   ctx.restore();
 
@@ -1673,6 +1951,890 @@ function drawChart(canvas, getY, color, yLabel, yMin, yMax) {
   ctx.textAlign = "right";
   ctx.textBaseline = "top";
   ctx.fillText(textFor("timeAxis"), w - pad.r, h - 17);
+}
+
+function trimPolynomial(coefficients) {
+  const result = coefficients.slice();
+  while (result.length > 1 && Math.abs(result[0]) < 1e-10) result.shift();
+  return result;
+}
+
+function cancelCommonOriginFactors(numerator, denominator) {
+  const num = trimPolynomial(numerator);
+  const den = trimPolynomial(denominator);
+
+  while (
+    num.length > 1 &&
+    den.length > 1 &&
+    Math.abs(num[num.length - 1]) < 1e-10 &&
+    Math.abs(den[den.length - 1]) < 1e-10
+  ) {
+    num.pop();
+    den.pop();
+  }
+
+  return { numerator: trimPolynomial(num), denominator: trimPolynomial(den) };
+}
+
+function addPolynomials(a, b, bScale = 1) {
+  const length = Math.max(a.length, b.length);
+  const result = Array(length).fill(0);
+  const aOffset = length - a.length;
+  const bOffset = length - b.length;
+
+  a.forEach((value, index) => {
+    result[index + aOffset] += value;
+  });
+  b.forEach((value, index) => {
+    result[index + bOffset] += bScale * value;
+  });
+
+  return trimPolynomial(result);
+}
+
+function linearModelFor(c) {
+  let numerator;
+  let referenceNumerator;
+  let denominator;
+  let exact = true;
+
+  if (c.controllerType === "pid") {
+    numerator = [c.Kd, c.Kp, c.Ki];
+    referenceNumerator = numerator.slice();
+    denominator = [c.mass, c.damping, 0, 0];
+  } else if (c.controllerType === "lqr") {
+    const gains = lqrGains(c);
+    numerator = [gains.kv, gains.kx];
+    referenceNumerator = [gains.kx];
+    denominator = [c.mass, c.damping, 0];
+  } else if (c.controllerType === "smc") {
+    const localSwitchGain = c.mass * c.smcEta / c.smcPhi;
+    const kpEquivalent = localSwitchGain * c.smcLambda;
+    const kdEquivalent = c.mass * c.smcLambda - c.damping + localSwitchGain;
+    numerator = [kdEquivalent, kpEquivalent];
+    referenceNumerator = [c.mass * c.smcLambda + localSwitchGain, kpEquivalent];
+    denominator = [c.mass, c.damping, 0];
+    exact = false;
+  } else {
+    const kpEquivalent = 0.55 * c.fuzzyGain / c.fuzzyEScale;
+    const kdRule = 0.55 * c.fuzzyGain / c.fuzzyDScale;
+    const kdEquivalent = kdRule + c.fuzzyVDamp;
+    numerator = [kdEquivalent, kpEquivalent];
+    referenceNumerator = [kdRule, kpEquivalent];
+    denominator = [c.mass, c.damping, 0];
+    exact = false;
+  }
+
+  const simplified = cancelCommonOriginFactors(numerator, denominator);
+  if (c.controllerType === "pid") referenceNumerator = simplified.numerator.slice();
+  return {
+    ...simplified,
+    referenceNumerator: trimPolynomial(referenceNumerator),
+    closedDenominator: addPolynomials(simplified.denominator, simplified.numerator),
+    exact,
+    controllerType: c.controllerType
+  };
+}
+
+function complex(re = 0, im = 0) {
+  return { re, im };
+}
+
+function complexAdd(a, b) {
+  return complex(a.re + b.re, a.im + b.im);
+}
+
+function complexSubtract(a, b) {
+  return complex(a.re - b.re, a.im - b.im);
+}
+
+function complexMultiply(a, b) {
+  return complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+}
+
+function complexDivide(a, b) {
+  const d = b.re * b.re + b.im * b.im;
+  if (d < 1e-24) return complex(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+  return complex((a.re * b.re + a.im * b.im) / d, (a.im * b.re - a.re * b.im) / d);
+}
+
+function complexMagnitude(a) {
+  return Math.hypot(a.re, a.im);
+}
+
+function evaluatePolynomial(coefficients, z) {
+  return coefficients.reduce(
+    (value, coefficient) => complexAdd(complexMultiply(value, z), complex(coefficient, 0)),
+    complex(0, 0)
+  );
+}
+
+function polynomialRoots(coefficients) {
+  const poly = trimPolynomial(coefficients);
+  const degree = poly.length - 1;
+  if (degree <= 0) return [];
+  if (degree === 1) return [complex(-poly[1] / poly[0], 0)];
+
+  const normalized = poly.map(value => value / poly[0]);
+  const radius = 1 + Math.max(...normalized.slice(1).map(value => Math.abs(value)));
+  let roots = Array.from({ length: degree }, (_, index) => {
+    const angle = 2 * Math.PI * index / degree + 0.37;
+    return complex(radius * Math.cos(angle), radius * Math.sin(angle));
+  });
+
+  for (let iteration = 0; iteration < 80; iteration++) {
+    let largestChange = 0;
+    const nextRoots = roots.map((root, index) => {
+      let product = complex(1, 0);
+
+      roots.forEach((other, otherIndex) => {
+        if (otherIndex !== index) {
+          product = complexMultiply(product, complexSubtract(root, other));
+        }
+      });
+
+      if (complexMagnitude(product) < 1e-14) {
+        product = complexAdd(product, complex(1e-10, 1e-10));
+      }
+
+      const correction = complexDivide(evaluatePolynomial(normalized, root), product);
+      largestChange = Math.max(largestChange, complexMagnitude(correction));
+      return complexSubtract(root, correction);
+    });
+
+    roots = nextRoots;
+    if (largestChange < 1e-9) break;
+  }
+
+  return roots.map(root => complex(
+    Math.abs(root.re) < 1e-9 ? 0 : root.re,
+    Math.abs(root.im) < 1e-9 ? 0 : root.im
+  ));
+}
+
+function formatPolynomialNumber(value) {
+  const abs = Math.abs(value);
+  if (abs >= 1000 || (abs > 0 && abs < 0.001)) return abs.toExponential(2);
+  return Number(abs.toFixed(3)).toString();
+}
+
+function polynomialToText(coefficients) {
+  const poly = trimPolynomial(coefficients);
+  const degree = poly.length - 1;
+  const terms = [];
+
+  poly.forEach((coefficient, index) => {
+    if (Math.abs(coefficient) < 1e-10) return;
+    const power = degree - index;
+    const sign = coefficient < 0 ? "−" : "+";
+    const omitOne = power > 0 && Math.abs(Math.abs(coefficient) - 1) < 1e-10;
+    const coefficientText = omitOne ? "" : formatPolynomialNumber(coefficient);
+    const variable = power === 0 ? "" : (power === 1 ? "s" : `s<sup>${power}</sup>`);
+    terms.push({ sign, text: `${coefficientText}${variable}` });
+  });
+
+  if (!terms.length) return "0";
+  return terms.map((term, index) => {
+    if (index === 0) return `${term.sign === "−" ? "−" : ""}${term.text}`;
+    return ` ${term.sign} ${term.text}`;
+  }).join("");
+}
+
+let analysisCache = null;
+let analysisRenderSignature = "";
+let transferDisplaySignature = "";
+let marginDisplaySignature = "";
+
+function bodeFrequencyBounds(model) {
+  const roots = [
+    ...polynomialRoots(model.numerator),
+    ...polynomialRoots(model.denominator)
+  ];
+  const characteristicFrequencies = roots
+    .map(complexMagnitude)
+    .filter(value => Number.isFinite(value) && value > 1e-6);
+
+  if (!characteristicFrequencies.length) return { logMin: -3, logMax: 3 };
+
+  let logMin = Math.floor(Math.log10(Math.min(...characteristicFrequencies))) - 2;
+  let logMax = Math.ceil(Math.log10(Math.max(...characteristicFrequencies))) + 2;
+  const missingSpan = Math.max(0, 6 - (logMax - logMin));
+  logMin -= missingSpan / 2;
+  logMax += missingSpan / 2;
+
+  return {
+    logMin: Math.max(-6, logMin),
+    logMax: Math.min(6, logMax)
+  };
+}
+
+function interpolateBodeCrossings(points, key, target) {
+  const crossings = [];
+
+  for (let index = 1; index < points.length; index++) {
+    const previous = points[index - 1];
+    const current = points[index];
+    const a = previous[key] - target;
+    const b = current[key] - target;
+
+    if (a === 0) {
+      crossings.push({ ...previous });
+      continue;
+    }
+    if (a * b >= 0) continue;
+
+    const ratio = clamp(-a / (b - a), 0, 1);
+    const logFrequency = previous.logFrequency + ratio * (current.logFrequency - previous.logFrequency);
+    crossings.push({
+      omega: 10 ** logFrequency,
+      logFrequency,
+      magnitude: previous.magnitude + ratio * (current.magnitude - previous.magnitude),
+      phase: previous.phase + ratio * (current.phase - previous.phase)
+    });
+  }
+
+  return crossings.filter((crossing, index) =>
+    index === 0 || Math.abs(crossing.logFrequency - crossings[index - 1].logFrequency) > 1e-7
+  );
+}
+
+function calculateStabilityMargins(bode) {
+  const gainCrossings = interpolateBodeCrossings(bode, "magnitude", 0)
+    .map(crossing => ({ ...crossing, margin: 180 + crossing.phase }))
+    .sort((a, b) => a.margin - b.margin);
+  const phaseCrossings = interpolateBodeCrossings(bode, "phase", -180)
+    .map(crossing => ({ ...crossing, margin: -crossing.magnitude }))
+    .sort((a, b) => a.margin - b.margin);
+
+  return {
+    phaseMargin: gainCrossings[0] || null,
+    gainMargin: phaseCrossings[0] || {
+      omega: null,
+      logFrequency: null,
+      magnitude: null,
+      phase: null,
+      margin: Number.POSITIVE_INFINITY
+    }
+  };
+}
+
+function rootPermutations(items) {
+  if (items.length <= 1) return [items.slice()];
+  return items.flatMap((item, index) =>
+    rootPermutations(items.filter((_, itemIndex) => itemIndex !== index))
+      .map(rest => [item, ...rest])
+  );
+}
+
+function orderRootsByContinuity(roots, previousRoots) {
+  if (!previousRoots || previousRoots.length !== roots.length) {
+    return roots.slice().sort((a, b) => a.re - b.re || a.im - b.im);
+  }
+
+  let best = roots.slice();
+  let bestCost = Number.POSITIVE_INFINITY;
+  rootPermutations(roots).forEach(candidate => {
+    const cost = candidate.reduce((sum, root, index) => {
+      const dr = root.re - previousRoots[index].re;
+      const di = root.im - previousRoots[index].im;
+      return sum + dr * dr + di * di;
+    }, 0);
+    if (cost < bestCost) {
+      bestCost = cost;
+      best = candidate;
+    }
+  });
+  return best;
+}
+
+function buildRootLocus(model) {
+  const gains = [0];
+  for (let index = 0; index <= 168; index++) gains.push(10 ** (-4 + 7 * index / 168));
+  if (!gains.some(gain => Math.abs(gain - 1) < 1e-10)) gains.push(1);
+  gains.sort((a, b) => a - b);
+
+  let previousRoots = null;
+  let branches = [];
+
+  gains.forEach(gain => {
+    const roots = polynomialRoots(addPolynomials(model.denominator, model.numerator, gain));
+    const ordered = orderRootsByContinuity(roots, previousRoots);
+    if (!branches.length) branches = ordered.map(() => []);
+    ordered.forEach((root, index) => branches[index].push({ ...root, gain }));
+    previousRoots = ordered;
+  });
+
+  return {
+    branches,
+    points: branches.flat()
+  };
+}
+
+function buildAnalysisData(c) {
+  const model = linearModelFor(c);
+  const { logMin, logMax } = bodeFrequencyBounds(model);
+  const bode = [];
+  let previousPhase = null;
+
+  for (let index = 0; index <= 480; index++) {
+    const logFrequency = logMin + (logMax - logMin) * index / 480;
+    const omega = 10 ** logFrequency;
+    const jw = complex(0, omega);
+    const response = complexDivide(
+      evaluatePolynomial(model.numerator, jw),
+      evaluatePolynomial(model.denominator, jw)
+    );
+    const magnitude = clamp(20 * Math.log10(Math.max(1e-12, complexMagnitude(response))), -180, 180);
+    let phase = Math.atan2(response.im, response.re) * 180 / Math.PI;
+
+    if (previousPhase === null && phase > 90) {
+      phase -= 360;
+    } else if (previousPhase !== null) {
+      while (phase - previousPhase > 180) phase -= 360;
+      while (phase - previousPhase < -180) phase += 360;
+    }
+    previousPhase = phase;
+    bode.push({ omega, logFrequency, magnitude, phase });
+  }
+
+  const rootLocus = buildRootLocus(model);
+
+  return {
+    model,
+    logMin,
+    logMax,
+    bode,
+    margins: calculateStabilityMargins(bode),
+    poles: polynomialRoots(model.denominator),
+    zeros: polynomialRoots(model.numerator),
+    closedPoles: polynomialRoots(model.closedDenominator),
+    locus: rootLocus.points,
+    locusBranches: rootLocus.branches
+  };
+}
+
+function analysisDataFor(c) {
+  const model = linearModelFor(c);
+  const signature = [
+    ...model.numerator,
+    "|",
+    ...model.denominator
+  ].join(",");
+
+  if (!analysisCache || analysisCache.signature !== signature) {
+    analysisCache = { signature, data: buildAnalysisData(c) };
+  }
+
+  return analysisCache.data;
+}
+
+function updateTransferFunctionDisplay(data) {
+  const displaySignature = [
+    currentLanguage,
+    data.model.exact,
+    ...data.model.numerator,
+    "|",
+    ...data.model.denominator,
+    "|",
+    ...data.model.referenceNumerator
+  ].join(",");
+  if (displaySignature === transferDisplaySignature) return;
+  transferDisplaySignature = displaySignature;
+
+  const kind = data.model.exact ? textFor("exactModel") : textFor("linearizedModel");
+  const numerator = polynomialToText(data.model.numerator);
+  const denominator = polynomialToText(data.model.denominator);
+  const referenceNumerator = polynomialToText(data.model.referenceNumerator);
+  const closedDenominator = polynomialToText(data.model.closedDenominator);
+  const isClassicalUnityFeedback =
+    data.model.numerator.length === data.model.referenceNumerator.length &&
+    data.model.numerator.every((value, index) =>
+      Math.abs(value - data.model.referenceNumerator[index]) < 1e-9
+    );
+  const loopLabel = data.model.controllerType === "pid"
+    ? textFor("openLoopLabel")
+    : textFor("equivalentOpenLoopLabel");
+  const analysisNote = data.model.controllerType === "pid"
+    ? textFor("pidAnalysisNote")
+    : (data.model.controllerType === "lqr" ? textFor("lqrAnalysisNote") : textFor("nonlinearAnalysisNote"));
+  const fractionHtml = (top, bottom) =>
+    `<span class="fraction"><span>${top}</span><span>${bottom}</span></span>`;
+  const classicalRelation = isClassicalUnityFeedback
+    ? `<span>=</span>${fractionHtml("L(s)", "1 + L(s)")}`
+    : "";
+  const markup = `
+    <div><b>${kind}</b></div>
+    <div class="transfer-block">
+      <b>${loopLabel}</b>
+      <div class="display-equation">
+        <span>L(s)</span><span>=</span><span>C<sub>eq</sub>(s)G(s)</span><span>=</span>
+        ${fractionHtml(numerator, denominator)}
+      </div>
+      <div class="equation-definition">${textFor("openLoopDefinition")}</div>
+    </div>
+    <div class="transfer-block">
+      <b>${textFor("closedLoopLabel")}</b>
+      <div class="display-equation">
+        <span>T<sub>xr</sub>(s)</span><span>=</span>
+        ${fractionHtml("X(s)", "R(s)")}${classicalRelation}<span>=</span>
+        ${fractionHtml(referenceNumerator, closedDenominator)}
+      </div>
+      <div class="equation-definition">${textFor("closedLoopDefinition")}</div>
+    </div>
+    <div class="equation-note">${analysisNote}</div>
+  `;
+
+  $("analysisModelBode").innerHTML = markup;
+  $("analysisModelPoleZero").innerHTML = markup;
+}
+
+function formatFrequency(value) {
+  if (!Number.isFinite(value)) return "—";
+  if (value >= 1000 || value < 0.01) return value.toExponential(3);
+  return Number(value.toFixed(3)).toString();
+}
+
+function updateMarginDisplay(data) {
+  const signature = [
+    currentLanguage,
+    data.margins.phaseMargin?.margin,
+    data.margins.phaseMargin?.omega,
+    data.margins.gainMargin.margin,
+    data.margins.gainMargin.omega
+  ].join(",");
+  if (signature === marginDisplaySignature) return;
+  marginDisplaySignature = signature;
+
+  const pm = data.margins.phaseMargin;
+  const gm = data.margins.gainMargin;
+  $("phaseMarginValue").textContent = pm ? `${pm.margin.toFixed(2)}°` : "—";
+  $("phaseMarginFrequency").textContent = pm
+    ? `${textFor("atGainCrossover")} = ${formatFrequency(pm.omega)} rad/s`
+    : textFor("noGainCrossover");
+  $("gainMarginValue").textContent = Number.isFinite(gm.margin)
+    ? `${gm.margin.toFixed(2)} dB`
+    : "∞";
+  $("gainMarginFrequency").textContent = Number.isFinite(gm.margin)
+    ? `${textFor("atPhaseCrossover")} = ${formatFrequency(gm.omega)} rad/s`
+    : textFor("noPhaseCrossover");
+}
+
+function chartIsVisible(canvas) {
+  const body = canvas.closest(".chart-body");
+  return !body || !body.hidden;
+}
+
+function roundedPlotRange(values, step, minimumSpan) {
+  let min = Math.min(...values);
+  let max = Math.max(...values);
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return [-minimumSpan / 2, minimumSpan / 2];
+  if (max - min < minimumSpan) {
+    const middle = (min + max) / 2;
+    min = middle - minimumSpan / 2;
+    max = middle + minimumSpan / 2;
+  }
+  return [Math.floor((min - step * 0.25) / step) * step, Math.ceil((max + step * 0.25) / step) * step];
+}
+
+function drawBodeSection(ctx, data, bounds, valueKey, range, color, label, logMin, logMax, reference) {
+  const { left, right, top, bottom } = bounds;
+  const [minValue, maxValue] = range;
+  const xMap = logFrequency => left + (logFrequency - logMin) / (logMax - logMin) * (right - left);
+  const yMap = value => bottom - (value - minValue) / (maxValue - minValue) * (bottom - top);
+
+  ctx.font = `11px ${UI_FONT_FAMILY}`;
+  ctx.lineWidth = 1;
+  ctx.textBaseline = "middle";
+
+  for (let index = 0; index <= 4; index++) {
+    const value = minValue + (maxValue - minValue) * index / 4;
+    const y = yMap(value);
+    ctx.strokeStyle = "#e8eceb";
+    ctx.beginPath();
+    ctx.moveTo(left, y);
+    ctx.lineTo(right, y);
+    ctx.stroke();
+    ctx.fillStyle = "#666";
+    ctx.textAlign = "right";
+    ctx.fillText(formatTick(value), left - 8, y);
+  }
+
+  for (let exponent = Math.ceil(logMin); exponent <= Math.floor(logMax); exponent++) {
+    const x = xMap(exponent);
+    ctx.strokeStyle = "#e8eceb";
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, bottom);
+    ctx.stroke();
+  }
+
+  let referenceY = null;
+  if (reference && reference.value >= minValue && reference.value <= maxValue) {
+    referenceY = yMap(reference.value);
+    ctx.save();
+    ctx.strokeStyle = reference.color;
+    ctx.lineWidth = 2.2;
+    ctx.setLineDash([8, 4]);
+    ctx.beginPath();
+    ctx.moveTo(left, referenceY);
+    ctx.lineTo(right, referenceY);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.3;
+  ctx.beginPath();
+  data.forEach((point, index) => {
+    const x = xMap(point.logFrequency);
+    const y = yMap(point[valueKey]);
+    if (index === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  ctx.strokeStyle = "#9ca8a6";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(left, top, right - left, bottom - top);
+
+  ctx.fillStyle = color;
+  ctx.font = `bold 12px ${UI_FONT_FAMILY}`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "bottom";
+  ctx.fillText(label, left + 6, top - 4);
+
+  if (referenceY !== null) {
+    ctx.font = `bold 12px ${UI_FONT_FAMILY}`;
+    ctx.textAlign = "right";
+    ctx.textBaseline = "bottom";
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.94)";
+    ctx.strokeText(reference.label, right - 7, referenceY - 4);
+    ctx.fillStyle = reference.color;
+    ctx.fillText(reference.label, right - 7, referenceY - 4);
+  }
+}
+
+function drawBodePlot(data) {
+  const canvas = $("bodeChart");
+  if (!chartIsVisible(canvas)) return;
+  const { ctx, w, h } = setupCanvas(canvas);
+  if (w < 120 || h < 120) return;
+
+  const left = 64;
+  const right = w - 16;
+  const top = 28;
+  const bottom = h - 43;
+  const gap = 45;
+  const sectionHeight = (bottom - top - gap) / 2;
+  const magnitudeBounds = { left, right, top, bottom: top + sectionHeight };
+  const phaseBounds = { left, right, top: top + sectionHeight + gap, bottom };
+  const magnitudeRange = roundedPlotRange([...data.bode.map(point => point.magnitude), 0], 20, 40);
+  const phaseRange = roundedPlotRange([...data.bode.map(point => point.phase), -180], 45, 90);
+
+  ctx.clearRect(0, 0, w, h);
+  drawBodeSection(
+    ctx,
+    data.bode,
+    magnitudeBounds,
+    "magnitude",
+    magnitudeRange,
+    "#0a8c8f",
+    textFor("magnitudeAxis"),
+    data.logMin,
+    data.logMax,
+    { value: 0, label: "0 dB", color: "#556f20" }
+  );
+  drawBodeSection(
+    ctx,
+    data.bode,
+    phaseBounds,
+    "phase",
+    phaseRange,
+    "#bd4b3f",
+    textFor("phaseAxis"),
+    data.logMin,
+    data.logMax,
+    { value: -180, label: "−180°", color: "#9f342b" }
+  );
+
+  const xMap = logFrequency =>
+    left + (logFrequency - data.logMin) / (data.logMax - data.logMin) * (right - left);
+  const magnitudeY = value =>
+    magnitudeBounds.bottom - (value - magnitudeRange[0]) / (magnitudeRange[1] - magnitudeRange[0]) *
+      (magnitudeBounds.bottom - magnitudeBounds.top);
+  const phaseY = value =>
+    phaseBounds.bottom - (value - phaseRange[0]) / (phaseRange[1] - phaseRange[0]) *
+      (phaseBounds.bottom - phaseBounds.top);
+
+  const drawMarginMarker = (crossing, color, shortLabel, topOffset) => {
+    if (!crossing || !Number.isFinite(crossing.logFrequency)) return;
+    const x = xMap(crossing.logFrequency);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 1.4;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x, magnitudeBounds.top);
+    ctx.lineTo(x, phaseBounds.bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.beginPath();
+    ctx.arc(x, magnitudeY(crossing.magnitude), 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, phaseY(crossing.phase), 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.font = `bold 11px ${UI_FONT_FAMILY}`;
+    ctx.textAlign = x > (left + right) / 2 ? "right" : "left";
+    ctx.textBaseline = "top";
+    ctx.fillText(shortLabel, x + (ctx.textAlign === "right" ? -5 : 5), magnitudeBounds.top + topOffset);
+    ctx.restore();
+  };
+
+  drawMarginMarker(data.margins.phaseMargin, "#7c8d2f", "ωgc / PM", 5);
+  if (Number.isFinite(data.margins.gainMargin.margin)) {
+    drawMarginMarker(data.margins.gainMargin, "#d79b2f", "ωpc / GM", 20);
+  }
+
+  ctx.fillStyle = "#666";
+  ctx.font = `11px ${UI_FONT_FAMILY}`;
+  ctx.textBaseline = "top";
+  for (let exponent = Math.ceil(data.logMin); exponent <= Math.floor(data.logMax); exponent++) {
+    const x = xMap(exponent);
+    const value = 10 ** exponent;
+    ctx.textAlign = exponent === Math.ceil(data.logMin)
+      ? "left"
+      : (exponent === Math.floor(data.logMax) ? "right" : "center");
+    const label = value >= 10000 || value < 0.001
+      ? `1e${exponent}`
+      : (value < 1 ? value.toFixed(-exponent) : value.toFixed(0));
+    ctx.fillText(label, x, bottom + 7);
+  }
+  ctx.textAlign = "right";
+  ctx.fillText(textFor("frequencyAxis"), right, h - 16);
+}
+
+function drawCross(ctx, x, y, color, size = 6, width = 2.2) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.beginPath();
+  ctx.moveTo(x - size, y - size);
+  ctx.lineTo(x + size, y + size);
+  ctx.moveTo(x + size, y - size);
+  ctx.lineTo(x - size, y + size);
+  ctx.stroke();
+}
+
+function drawDiamond(ctx, x, y, color, size = 6) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(x, y - size);
+  ctx.lineTo(x + size, y);
+  ctx.lineTo(x, y + size);
+  ctx.lineTo(x - size, y);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function rootLocusDisplayLimit(data) {
+  const anchors = [...data.poles, ...data.zeros, ...data.closedPoles]
+    .filter(point => Number.isFinite(point.re) && Number.isFinite(point.im));
+  const largestAnchor = Math.max(
+    1,
+    ...anchors.flatMap(point => [Math.abs(point.re), Math.abs(point.im)])
+  );
+  const rawLimit = largestAnchor * 1.3;
+  const power = 10 ** Math.floor(Math.log10(rawLimit));
+  const normalized = rawLimit / power;
+  const nice = normalized <= 1 ? 1 : (normalized <= 2 ? 2 : (normalized <= 5 ? 5 : 10));
+  return nice * power;
+}
+
+function drawPoleZeroPlot(data) {
+  const canvas = $("poleZeroChart");
+  if (!chartIsVisible(canvas)) return;
+  const { ctx, w, h } = setupCanvas(canvas);
+  if (w < 120 || h < 120) return;
+
+  const showLocus = $("rootLocusTrail").checked;
+  const limit = rootLocusDisplayLimit(data);
+
+  const bounds = { left: 54, right: w - 18, top: 22, bottom: h - 43 };
+  const scale = Math.min(
+    (bounds.right - bounds.left) / (2 * limit),
+    (bounds.bottom - bounds.top) / (2 * limit)
+  );
+  const originX = (bounds.left + bounds.right) / 2;
+  const originY = (bounds.top + bounds.bottom) / 2;
+  const xMap = value => originX + value * scale;
+  const yMap = value => originY - value * scale;
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "#f1f8f4";
+  ctx.fillRect(bounds.left, bounds.top, Math.max(0, originX - bounds.left), bounds.bottom - bounds.top);
+
+  ctx.font = `11px ${UI_FONT_FAMILY}`;
+  ctx.textBaseline = "top";
+  for (let index = -2; index <= 2; index++) {
+    const value = limit * index / 2;
+    const x = xMap(value);
+    const y = yMap(value);
+    ctx.strokeStyle = index === 0 ? "#8f9b99" : "#e5eae9";
+    ctx.lineWidth = index === 0 ? 1.3 : 1;
+
+    ctx.beginPath();
+    ctx.moveTo(x, bounds.top);
+    ctx.lineTo(x, bounds.bottom);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(bounds.left, y);
+    ctx.lineTo(bounds.right, y);
+    ctx.stroke();
+
+    ctx.fillStyle = "#666";
+    ctx.textAlign = "center";
+    ctx.fillText(formatTick(value), x, bounds.bottom + 7);
+    if (index !== 0) {
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.fillText(formatTick(value), bounds.left - 7, y);
+      ctx.textBaseline = "top";
+    }
+  }
+
+  if (showLocus) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top);
+    ctx.clip();
+    ctx.strokeStyle = "rgba(10, 140, 143, 0.82)";
+    ctx.lineWidth = 2.2;
+
+    data.locusBranches.forEach(branch => {
+      ctx.beginPath();
+      branch.forEach((point, index) => {
+        const x = xMap(point.re);
+        const y = yMap(point.im);
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  data.zeros.forEach(point => {
+    if (Math.abs(point.re) > limit || Math.abs(point.im) > limit) return;
+    ctx.strokeStyle = "#3467b0";
+    ctx.lineWidth = 2.3;
+    ctx.beginPath();
+    ctx.arc(xMap(point.re), yMap(point.im), 6, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+
+  data.poles.forEach(point => {
+    if (Math.abs(point.re) > limit || Math.abs(point.im) > limit) return;
+    drawCross(ctx, xMap(point.re), yMap(point.im), "#bd4b3f");
+  });
+
+  data.closedPoles.forEach(point => {
+    if (Math.abs(point.re) > limit || Math.abs(point.im) > limit) return;
+    drawDiamond(ctx, xMap(point.re), yMap(point.im), "#0a8c8f");
+  });
+
+  ctx.strokeStyle = "#9ca8a6";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top);
+  ctx.fillStyle = "#666";
+  ctx.font = `11px ${UI_FONT_FAMILY}`;
+  ctx.textAlign = "right";
+  ctx.textBaseline = "top";
+  ctx.fillText(textFor("realAxis"), bounds.right, h - 16);
+
+  ctx.save();
+  ctx.translate(15, (bounds.top + bounds.bottom) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(textFor("imaginaryAxis"), 0, 0);
+  ctx.restore();
+}
+
+function drawControlAnalysis(c) {
+  const data = analysisDataFor(c);
+  updateTransferFunctionDisplay(data);
+  updateMarginDisplay(data);
+
+  const bodeCanvas = $("bodeChart");
+  const poleZeroCanvas = $("poleZeroChart");
+  const bodeRect = bodeCanvas.getBoundingClientRect();
+  const poleZeroRect = poleZeroCanvas.getBoundingClientRect();
+  const renderSignature = [
+    analysisCache.signature,
+    currentLanguage,
+    $("rootLocusTrail").checked,
+    chartIsVisible(bodeCanvas),
+    Math.round(bodeRect.width),
+    Math.round(bodeRect.height),
+    chartIsVisible(poleZeroCanvas),
+    Math.round(poleZeroRect.width),
+    Math.round(poleZeroRect.height)
+  ].join(",");
+
+  if (renderSignature === analysisRenderSignature) return;
+  analysisRenderSignature = renderSignature;
+  drawBodePlot(data);
+  drawPoleZeroPlot(data);
+}
+
+function updateCollapseButton(button) {
+  const body = document.getElementById(button.getAttribute("aria-controls"));
+  const collapsed = body.hidden;
+  button.setAttribute("aria-expanded", String(!collapsed));
+  button.innerHTML = `<span class="chart-toggle-icon" aria-hidden="true">${collapsed ? "▾" : "▴"}</span><span>${textFor(collapsed ? "expandChart" : "collapseChart")}</span>`;
+}
+
+function updateCollapseButtons() {
+  document.querySelectorAll(".chart-toggle").forEach(updateCollapseButton);
+}
+
+function setupChartCollapsibles() {
+  let chartIndex = 0;
+
+  document.querySelectorAll("canvas").forEach(canvas => {
+    const panel = canvas.closest(".panel");
+    if (!panel || panel.dataset.chartCollapsible === "ready") return;
+
+    const header = panel.querySelector(":scope > .chart-title, :scope > .panel-head");
+    if (!header) return;
+
+    panel.dataset.chartCollapsible = "ready";
+    panel.classList.add("chart-panel");
+    const body = document.createElement("div");
+    body.className = "chart-body";
+    body.id = `chartBody${chartIndex++}`;
+
+    while (header.nextSibling) body.appendChild(header.nextSibling);
+    panel.appendChild(body);
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "chart-toggle";
+    button.setAttribute("aria-controls", body.id);
+    button.onclick = () => {
+      body.hidden = !body.hidden;
+      updateCollapseButton(button);
+      if (!body.hidden) requestAnimationFrame(draw);
+    };
+
+    header.appendChild(button);
+    updateCollapseButton(button);
+  });
 }
 
 function calcZN(mode) {
@@ -1729,6 +2891,7 @@ function draw() {
   drawChart($("chart1"), p => p.term1, "#3467b0", s.labels[0], ranges[0][0], ranges[0][1]);
   drawChart($("chart2"), p => p.term2, "#7c8d2f", s.labels[1], ranges[1][0], ranges[1][1]);
   drawChart($("chart3"), p => p.term3, "#d79b2f", s.labels[2], ranges[2][0], ranges[2][1]);
+  drawControlAnalysis(c);
 
   $("st").textContent = s.t.toFixed(2);
   $("sx").textContent = fmt(s.x);
@@ -1841,9 +3004,11 @@ document.querySelectorAll("[data-lang-choice]").forEach(button => {
 
 $("znKu").oninput = () => updateZNPreview("pid");
 $("znPu").oninput = () => updateZNPreview("pid");
+$("rootLocusTrail").onchange = draw;
 
 compilePID();
 updateZNPreview("pid");
+setupChartCollapsibles();
 updateControllerUI();
 reset();
 requestAnimationFrame(loop);
