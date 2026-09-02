@@ -390,6 +390,102 @@
       margin-bottom: 8px;
     }
 
+    .bode-controls {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      margin-bottom: 8px;
+    }
+
+    .bode-mode-control {
+      display: grid;
+      gap: 4px;
+      min-width: min(100%, 270px);
+      color: #526361;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .bode-mode-control select {
+      min-width: 250px;
+    }
+
+    .bode-margin-heading {
+      color: #58716f;
+      font-size: 12px;
+    }
+
+    .bode-context {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 7px 10px;
+    }
+
+    .analysis-help-button {
+      width: auto;
+      padding: 6px 10px;
+      border-color: #a9ceca;
+      color: #356665;
+      background: #f3f8f7;
+      font-size: 12px;
+    }
+
+    .margin-context-note,
+    .frequency-conversion-note {
+      margin: 0 0 8px;
+      color: #58716f;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .frequency-conversion-note {
+      padding: 7px 9px;
+      color: #634184;
+      background: #f8f4fb;
+      border-left: 3px solid #7a4da3;
+      border-radius: 3px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .frequency-comparison {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .frequency-readout {
+      display: grid;
+      gap: 3px;
+      padding: 8px 10px;
+      background: #f3f8f7;
+      border: 1px solid #d7e5e3;
+      border-radius: 6px;
+    }
+
+    .frequency-readout b {
+      color: #526361;
+      font-size: 11px;
+    }
+
+    .frequency-readout span {
+      color: #0a8c8f;
+      font-size: 15px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .frequency-readout small {
+      min-height: 1.35em;
+      color: #777;
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
     .margin-card {
       display: grid;
       grid-template-columns: auto 1fr;
@@ -471,6 +567,90 @@
       gap: 10px;
     }
 
+    .analysis-help-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(20, 25, 28, 0.52);
+    }
+
+    .analysis-help-modal.is-hidden {
+      display: none;
+    }
+
+    .analysis-help-dialog {
+      width: min(720px, 100%);
+      max-height: min(82vh, 760px);
+      overflow: auto;
+      padding: 20px;
+      color: #2f4544;
+      background: #fff;
+      border: 1px solid #d7dfdd;
+      border-radius: 9px;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.24);
+    }
+
+    .analysis-help-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .analysis-help-header h2 {
+      margin: 0;
+      font-size: 21px;
+    }
+
+    .analysis-help-close {
+      width: auto;
+      min-width: 38px;
+      padding: 6px 10px;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .analysis-help-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .analysis-help-item {
+      padding: 11px 12px;
+      background: #f6f9f8;
+      border: 1px solid #dce7e5;
+      border-radius: 6px;
+    }
+
+    .analysis-help-item h3 {
+      margin: 0 0 5px;
+      color: #245655;
+      font-size: 14px;
+    }
+
+    .analysis-help-item p {
+      margin: 0;
+      color: #5a6b69;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .analysis-help-item .help-equation {
+      margin-bottom: 5px;
+      color: #203f3e;
+      font-family: "Cambria Math", "Times New Roman", serif;
+      font-size: 15px;
+    }
+
+    .analysis-help-item-wide {
+      grid-column: 1 / -1;
+    }
+
     @media (max-width: 980px) {
       .app {
         grid-template-columns: 1fr;
@@ -483,13 +663,22 @@
       .stats,
       .term-now,
       .zn-result,
-      .bode-margins {
+      .bode-margins,
+      .frequency-comparison {
         grid-template-columns: 1fr;
       }
 
       .panel-head {
         align-items: flex-start;
         flex-direction: column;
+      }
+
+      .analysis-help-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .analysis-help-item-wide {
+        grid-column: auto;
       }
     }
   </style>
@@ -503,6 +692,50 @@
       <div class="language-actions">
         <button class="primary" type="button" data-lang-choice="en">English</button>
         <button type="button" data-lang-choice="zh">繁體中文</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="analysisHelpModal" class="analysis-help-modal is-hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="analysisHelpTitle">
+    <div class="analysis-help-dialog">
+      <div class="analysis-help-header">
+        <h2 id="analysisHelpTitle">名詞與圖表對照</h2>
+        <button id="analysisHelpClose" class="analysis-help-close" type="button" aria-label="關閉說明">×</button>
+      </div>
+      <div class="analysis-help-grid">
+        <section class="analysis-help-item">
+          <h3>開迴路 L(s)</h3>
+          <p class="help-equation">L(s) = C<sub>eq</sub>(s)G(s)</p>
+          <p>把回授迴路想像成在某處切開後得到的迴路增益，主要用來判斷穩定裕度與設計控制器；它不是模擬中某一個實際輸入到位置輸出的響應。</p>
+        </section>
+        <section class="analysis-help-item">
+          <h3>參考 R → 位置 X</h3>
+          <p class="help-equation">T<sub>xr</sub>(s) = X(s) / R(s)</p>
+          <p>描述目標位置命令 R 經閉迴路後，實際位置 X 如何跟隨。適合觀察追蹤速度、頻寬與高頻命令衰減。</p>
+        </section>
+        <section class="analysis-help-item">
+          <h3>干擾 D → 位置 X</h3>
+          <p class="help-equation">T<sub>xd</sub>(s) = X(s) / D(s)</p>
+          <p>描述施加在質點上的外力 D 最後造成多少位置 X 變化。這條曲線才和網頁的「外部擾動」時間模擬直接對應。</p>
+        </section>
+        <section class="analysis-help-item">
+          <h3>為什麼切換後 PM／GM 不變？</h3>
+          <p>PM 與 GM 按定義只由開迴路 L(s) 計算。下拉選單只更換正在觀看的輸入／輸出傳遞函數，沒有更改控制器、質量或阻尼，因此 PM／GM 應保持相同；調整系統參數後才會改變。</p>
+        </section>
+        <section class="analysis-help-item analysis-help-item-wide">
+          <h3>Hz、rad/s 與對數橫軸</h3>
+          <p class="help-equation">ω = 2πf</p>
+          <p>擾動欄位輸入的是 f（Hz，每秒幾個週期），標準波德圖使用 ω（rad/s）。例如 10 Hz 等於 62.832 rad/s，所以標記會位在 10 與 100 rad/s 之間。橫軸是對數刻度，相同距離代表相同倍數，不代表相同差值。</p>
+        </section>
+        <section class="analysis-help-item">
+          <h3>干擾閉迴路增益</h3>
+          <p class="help-equation">20 log<sub>10</sub>|T<sub>xd</sub>(jω<sub>d</sub>)|</p>
+          <p>表示目前擾動頻率經閉迴路後被放大或衰減多少。負 dB 代表位置響應比輸入干擾小。</p>
+        </section>
+        <section class="analysis-help-item">
+          <h3>理論位置振幅與模擬量測振幅</h3>
+          <p>理論值是輸入基頻振幅乘上 |Txd| 的穩態小訊號預測；模擬值則用最近兩個週期的位置峰對峰值除以二。暫態尚未消失、方波／三角波的高次諧波或離散步長，都可能造成兩者略有差異。</p>
+        </section>
       </div>
     </div>
   </div>
@@ -882,8 +1115,23 @@ return { force: p + i + d, p, i, d };</textarea>
         <div class="panel">
           <div class="chart-title">
             <h2>波德圖</h2>
-            <span class="chart-value">開迴路頻率響應</span>
+            <span class="chart-value" id="bodeResponseTitle">干擾 D → 位置 X</span>
           </div>
+          <div class="bode-controls">
+            <label class="bode-mode-control">
+              <span>顯示頻率響應</span>
+              <select id="bodeResponseType">
+                <option value="disturbance" selected>干擾 D → 位置 X</option>
+                <option value="reference">參考 R → 位置 X</option>
+                <option value="openLoop">開迴路 L（PM／GM）</option>
+              </select>
+            </label>
+            <div class="bode-context">
+              <span class="bode-margin-heading">開迴路穩定裕度（僅由 L(s) 計算）</span>
+              <button id="analysisHelpButton" class="analysis-help-button" type="button" aria-haspopup="dialog" aria-controls="analysisHelpModal">ⓘ 名詞與圖表對照</button>
+            </div>
+          </div>
+          <p class="margin-context-note" id="marginContextNote">切換曲線只改變顯示內容；PM／GM 仍屬於同一個開迴路 L(s)。</p>
           <div class="bode-margins" aria-label="穩定裕度">
             <div class="margin-card">
               <b>相位裕度 PM</b>
@@ -896,8 +1144,31 @@ return { force: p + i + d, p, i, d };</textarea>
               <span class="margin-frequency" id="gainMarginFrequency">—</span>
             </div>
           </div>
+          <div class="frequency-comparison" aria-label="目前擾動的理論與模擬對照">
+            <div class="frequency-readout">
+              <b>目前擾動頻率</b>
+              <span id="disturbanceFrequencyValue">—</span>
+              <small id="disturbanceFrequencyNote">—</small>
+            </div>
+            <div class="frequency-readout">
+              <b>干擾閉迴路增益</b>
+              <span id="disturbanceGainValue">—</span>
+              <small>|T<sub>xd</sub>(jω<sub>d</sub>)|</small>
+            </div>
+            <div class="frequency-readout">
+              <b>理論位置振幅</b>
+              <span id="disturbancePredictionValue">—</span>
+              <small id="disturbancePredictionNote">穩態小訊號預測</small>
+            </div>
+            <div class="frequency-readout">
+              <b>模擬量測振幅</b>
+              <span id="disturbanceObservedValue">—</span>
+              <small id="disturbanceObservedNote">至少執行兩個週期</small>
+            </div>
+          </div>
+          <p class="frequency-conversion-note" id="bodeFrequencyConversion">波德圖橫軸使用 ω（rad/s）；擾動設定使用 f（Hz），兩者關係為 ω = 2πf。</p>
           <canvas id="bodeChart" class="analysis-canvas"></canvas>
-          <p class="analysis-note">幅值顯示系統對不同頻率的放大或衰減，0 dB 是增益交越基準；相位則呈現輸出相對輸入的延遲。</p>
+          <p class="analysis-note">預設曲線是模擬中外力干擾 D 到位置 X 的閉迴路響應，可直接對照時間模擬。0 dB 與 −180° 是判讀基準；PM／GM 永遠由開迴路 L(s) 計算。</p>
           <div class="model-equations" id="analysisModelBode"></div>
         </div>
 
@@ -915,7 +1186,6 @@ return { force: p + i + d, p, i, d };</textarea>
           </div>
           <canvas id="poleZeroChart" class="analysis-canvas"></canvas>
           <p class="analysis-note">閉迴路極點位於左半平面代表線性化模型穩定；越靠近虛軸，響應通常越慢或越容易振盪。</p>
-          <div class="model-equations" id="analysisModelPoleZero"></div>
         </div>
       </section>
     </section>
@@ -1033,7 +1303,37 @@ const staticTranslations = {
   "依目前資料即時估算；目標值變更時會重新計算，安定時間若再次離開 ±2% 範圍也會更新。": "Estimated from current simulation data. Metrics restart when the target changes, and settling time updates if the response leaves the ±2% band again.",
   "波德圖": "Bode Plot",
   "開迴路頻率響應": "Open-Loop Frequency Response",
+  "顯示頻率響應": "Frequency Response to Display",
+  "干擾 D → 位置 X": "Disturbance D → Position X",
+  "參考 R → 位置 X": "Reference R → Position X",
+  "開迴路 L（PM／GM）": "Open Loop L (PM / GM)",
+  "開迴路穩定裕度（僅由 L(s) 計算）": "Open-Loop Stability Margins (Calculated from L(s) Only)",
+  "ⓘ 名詞與圖表對照": "ⓘ Terms and Plot Guide",
+  "名詞與圖表對照": "Terms and Plot Guide",
+  "切換曲線只改變顯示內容；PM／GM 仍屬於同一個開迴路 L(s)。": "Switching the curve only changes what is displayed; PM and GM still belong to the same open loop L(s).",
+  "波德圖橫軸使用 ω（rad/s）；擾動設定使用 f（Hz），兩者關係為 ω = 2πf。": "The Bode horizontal axis uses ω (rad/s), while the disturbance setting uses f (Hz); they are related by ω = 2πf.",
+  "開迴路 L(s)": "Open Loop L(s)",
+  "把回授迴路想像成在某處切開後得到的迴路增益，主要用來判斷穩定裕度與設計控制器；它不是模擬中某一個實際輸入到位置輸出的響應。": "The loop gain obtained by conceptually breaking the feedback loop. It is mainly used for stability margins and controller design; it is not an actual input-to-position response in the simulation.",
+  "參考 R → 位置 X": "Reference R → Position X",
+  "描述目標位置命令 R 經閉迴路後，實際位置 X 如何跟隨。適合觀察追蹤速度、頻寬與高頻命令衰減。": "Describes how actual position X follows the commanded position R through the closed loop. It is useful for studying tracking speed, bandwidth, and attenuation of high-frequency commands.",
+  "干擾 D → 位置 X": "Disturbance D → Position X",
+  "描述施加在質點上的外力 D 最後造成多少位置 X 變化。這條曲線才和網頁的「外部擾動」時間模擬直接對應。": "Describes how much position X changes because of external force D on the particle. This is the curve that directly corresponds to the site's external-disturbance time simulation.",
+  "為什麼切換後 PM／GM 不變？": "Why Do PM and GM Stay the Same When Switching?",
+  "PM 與 GM 按定義只由開迴路 L(s) 計算。下拉選單只更換正在觀看的輸入／輸出傳遞函數，沒有更改控制器、質量或阻尼，因此 PM／GM 應保持相同；調整系統參數後才會改變。": "By definition, PM and GM are calculated only from the open loop L(s). The selector only changes the input/output transfer function being viewed; it does not change the controller, mass, or damping. PM and GM should therefore remain unchanged until system parameters are adjusted.",
+  "Hz、rad/s 與對數橫軸": "Hz, rad/s, and the Logarithmic Axis",
+  "擾動欄位輸入的是 f（Hz，每秒幾個週期），標準波德圖使用 ω（rad/s）。例如 10 Hz 等於 62.832 rad/s，所以標記會位在 10 與 100 rad/s 之間。橫軸是對數刻度，相同距離代表相同倍數，不代表相同差值。": "The disturbance field uses f in Hz (cycles per second), while a standard Bode plot uses ω in rad/s. For example, 10 Hz equals 62.832 rad/s, so its marker lies between 10 and 100 rad/s. The axis is logarithmic: equal distances represent equal ratios, not equal differences.",
+  "干擾閉迴路增益": "Disturbance Closed-Loop Gain",
+  "表示目前擾動頻率經閉迴路後被放大或衰減多少。負 dB 代表位置響應比輸入干擾小。": "Shows how much the current disturbance frequency is amplified or attenuated by the closed loop. A negative dB value means the position response is smaller than the input disturbance.",
+  "理論位置振幅與模擬量測振幅": "Predicted and Measured Position Amplitudes",
+  "理論值是輸入基頻振幅乘上 |Txd| 的穩態小訊號預測；模擬值則用最近兩個週期的位置峰對峰值除以二。暫態尚未消失、方波／三角波的高次諧波或離散步長，都可能造成兩者略有差異。": "The predicted value is the input fundamental amplitude times |Txd| under steady-state small-signal assumptions. The measured value is half the peak-to-peak position over the latest two periods. Remaining transients, square/triangle-wave harmonics, and the discrete time step can cause small differences.",
+  "目前擾動頻率": "Current Disturbance Frequency",
+  "干擾閉迴路增益": "Disturbance Closed-Loop Gain",
+  "理論位置振幅": "Predicted Position Amplitude",
+  "模擬量測振幅": "Measured Simulation Amplitude",
+  "穩態小訊號預測": "Steady-State Small-Signal Prediction",
+  "至少執行兩個週期": "Run for at Least Two Periods",
   "幅值顯示系統對不同頻率的放大或衰減，0 dB 是增益交越基準；相位則呈現輸出相對輸入的延遲。": "Magnitude shows amplification or attenuation across frequency; 0 dB is the gain-crossover reference. Phase shows output lag relative to input.",
+  "預設曲線是模擬中外力干擾 D 到位置 X 的閉迴路響應，可直接對照時間模擬。0 dB 與 −180° 是判讀基準；PM／GM 永遠由開迴路 L(s) 計算。": "The default curve is the closed-loop response from the simulated external disturbance D to position X, so it can be compared directly with the time simulation. 0 dB and −180° are visual references; PM and GM are always calculated from the open loop L(s).",
   "相位裕度 PM": "Phase Margin PM",
   "增益裕度 GM": "Gain Margin GM",
   "極點零點圖": "Pole-Zero Plot",
@@ -1060,7 +1360,7 @@ const uiText = {
     safetyLimit: "控制力或擾動太大，已套用內部安全限制以避免瀏覽器重載。",
     collapseChart: "收起圖表",
     expandChart: "展開圖表",
-    frequencyAxis: "頻率 ω (rad/s)",
+    frequencyAxis: "上排：ω (rad/s)　下排：f (Hz)",
     magnitudeAxis: "幅值 (dB)",
     phaseAxis: "相位 (deg)",
     realAxis: "實軸 Re(s)",
@@ -1070,6 +1370,7 @@ const uiText = {
     openLoopLabel: "開迴路",
     equivalentOpenLoopLabel: "等效開迴路",
     closedLoopLabel: "閉迴路（參考輸入 R 到位置 X）",
+    disturbanceClosedLoopLabel: "閉迴路（外部干擾 D 到位置 X）",
     pidAnalysisNote: "以目前 PID 係數建立；若自訂 PID 函數含有非線性或額外邏輯，此線性圖形不再代表自訂程式。",
     lqrAnalysisNote: "此線性質量－阻尼模型中，LQR 等價於位置與速度狀態回授；閉迴路式使用模擬器實際的參考輸入路徑。",
     nonlinearAnalysisNote: "這是平衡點附近的小訊號近似，只適合觀察局部趨勢，不能作為全域非線性穩定性的證明。"
@@ -1079,7 +1380,23 @@ const uiText = {
     noGainCrossover: "掃描範圍內沒有 0 dB 增益交越",
     noPhaseCrossover: "掃描範圍內沒有 −180° 相位交越",
     openLoopDefinition: "等效控制器與受控體的乘積",
-    closedLoopDefinition: "由參考輸入 R(s) 到位置輸出 X(s)"
+    closedLoopDefinition: "由參考輸入 R(s) 到位置輸出 X(s)",
+    disturbanceClosedLoopDefinition: "由模擬器施加在受控體輸入端的外力 D(s) 到位置輸出 X(s)",
+    bodeModeDisturbance: "干擾 D → 位置 X",
+    bodeModeReference: "參考 R → 位置 X",
+    bodeModeOpenLoop: "開迴路 L（PM／GM）",
+    noSingleDisturbanceFrequency: "此波形沒有單一擾動頻率",
+    zeroDisturbanceFrequency: "擾動頻率必須大於 0 Hz",
+    fundamentalEstimate: "以波形基頻估算",
+    sinusoidalEstimate: "正弦穩態估算",
+    needTwoCycles: "至少執行兩個週期",
+    measuredFromRecentCycles: "最近兩週期峰對峰量測",
+    currentDisturbanceMarker: "目前擾動 ωd"
+    ,
+    marginContextOpen: "目前顯示開迴路 L(s)，圖上的 PM／GM 標記與上方數值直接對應。",
+    marginContextClosed: "目前顯示閉迴路輸入／輸出響應；切換曲線不會改變系統，所以 PM／GM 仍是同一個 L(s) 的數值。",
+    frequencyConversionBase: "波德圖橫軸上排為 ω（rad/s）、下排為對應的 f（Hz）；ω = 2πf。",
+    closeHelp: "關閉說明"
   },
   en: {
     htmlLang: "en",
@@ -1097,7 +1414,7 @@ const uiText = {
     safetyLimit: "Control force or disturbance is too large; internal safety limiting is active to avoid browser reload.",
     collapseChart: "Collapse Chart",
     expandChart: "Expand Chart",
-    frequencyAxis: "frequency ω (rad/s)",
+    frequencyAxis: "top: ω (rad/s)   bottom: f (Hz)",
     magnitudeAxis: "magnitude (dB)",
     phaseAxis: "phase (deg)",
     realAxis: "real axis Re(s)",
@@ -1107,6 +1424,7 @@ const uiText = {
     openLoopLabel: "Open loop",
     equivalentOpenLoopLabel: "Equivalent open loop",
     closedLoopLabel: "Closed loop (reference R to position X)",
+    disturbanceClosedLoopLabel: "Closed loop (external disturbance D to position X)",
     pidAnalysisNote: "Built from the current PID gains. If the custom PID function adds nonlinear or extra logic, this linear plot no longer represents that custom code.",
     lqrAnalysisNote: "For this linear mass-damper plant, LQR is equivalent to position and velocity state feedback. The closed-loop expression follows the simulator's actual reference path.",
     nonlinearAnalysisNote: "This is a small-signal approximation near equilibrium. It shows local trends and is not proof of global nonlinear stability."
@@ -1116,7 +1434,23 @@ const uiText = {
     noGainCrossover: "No 0 dB gain crossover in the scanned range",
     noPhaseCrossover: "No −180° phase crossover in the scanned range",
     openLoopDefinition: "Product of the equivalent controller and plant",
-    closedLoopDefinition: "From reference input R(s) to position output X(s)"
+    closedLoopDefinition: "From reference input R(s) to position output X(s)",
+    disturbanceClosedLoopDefinition: "From the external force D(s), applied at the plant input in the simulator, to position output X(s)",
+    bodeModeDisturbance: "Disturbance D → Position X",
+    bodeModeReference: "Reference R → Position X",
+    bodeModeOpenLoop: "Open Loop L (PM / GM)",
+    noSingleDisturbanceFrequency: "This waveform has no single disturbance frequency",
+    zeroDisturbanceFrequency: "Disturbance frequency must be greater than 0 Hz",
+    fundamentalEstimate: "Waveform fundamental estimate",
+    sinusoidalEstimate: "Sinusoidal steady-state estimate",
+    needTwoCycles: "Run for at least two periods",
+    measuredFromRecentCycles: "Peak-to-peak measurement over the latest two periods",
+    currentDisturbanceMarker: "current disturbance ωd"
+    ,
+    marginContextOpen: "The open loop L(s) is displayed; the PM/GM markers on the plot correspond directly to the values above.",
+    marginContextClosed: "A closed-loop input/output response is displayed. Switching curves does not change the system, so PM and GM remain those of the same L(s).",
+    frequencyConversionBase: "The Bode axis shows ω (rad/s) on the first row and the corresponding f (Hz) on the second; ω = 2πf.",
+    closeHelp: "Close help"
   }
 };
 
@@ -1199,6 +1533,7 @@ function applyLanguage(lang) {
   translateStaticText(lang);
   $("languageModal").classList.add("is-hidden");
   $("languageModal").style.display = "none";
+  $("analysisHelpClose").setAttribute("aria-label", textFor("closeHelp"));
   $("run").textContent = running ? textFor("pause") : textFor("start");
   updateControllerUI();
   updateCollapseButtons();
@@ -1731,6 +2066,7 @@ function record() {
 
   s.hist.push({
     t: s.t,
+    x: s.x,
     error: s.error,
     term1: s.term1,
     term2: s.term2,
@@ -1962,6 +2298,7 @@ function trimPolynomial(coefficients) {
 function cancelCommonOriginFactors(numerator, denominator) {
   const num = trimPolynomial(numerator);
   const den = trimPolynomial(denominator);
+  let cancelledOriginFactors = 0;
 
   while (
     num.length > 1 &&
@@ -1971,9 +2308,14 @@ function cancelCommonOriginFactors(numerator, denominator) {
   ) {
     num.pop();
     den.pop();
+    cancelledOriginFactors++;
   }
 
-  return { numerator: trimPolynomial(num), denominator: trimPolynomial(den) };
+  return {
+    numerator: trimPolynomial(num),
+    denominator: trimPolynomial(den),
+    cancelledOriginFactors
+  };
 }
 
 function addPolynomials(a, b, bScale = 1) {
@@ -1993,44 +2335,55 @@ function addPolynomials(a, b, bScale = 1) {
 }
 
 function linearModelFor(c) {
-  let numerator;
-  let referenceNumerator;
-  let denominator;
+  let loopNumerator;
+  let referenceNumeratorRaw;
+  let disturbanceNumeratorRaw;
+  let loopDenominator;
   let exact = true;
 
   if (c.controllerType === "pid") {
-    numerator = [c.Kd, c.Kp, c.Ki];
-    referenceNumerator = numerator.slice();
-    denominator = [c.mass, c.damping, 0, 0];
+    loopNumerator = [c.Kd, c.Kp, c.Ki];
+    referenceNumeratorRaw = loopNumerator.slice();
+    disturbanceNumeratorRaw = [1, 0];
+    loopDenominator = [c.mass, c.damping, 0, 0];
   } else if (c.controllerType === "lqr") {
     const gains = lqrGains(c);
-    numerator = [gains.kv, gains.kx];
-    referenceNumerator = [gains.kx];
-    denominator = [c.mass, c.damping, 0];
+    loopNumerator = [gains.kv, gains.kx];
+    referenceNumeratorRaw = [gains.kx];
+    disturbanceNumeratorRaw = [1];
+    loopDenominator = [c.mass, c.damping, 0];
   } else if (c.controllerType === "smc") {
     const localSwitchGain = c.mass * c.smcEta / c.smcPhi;
     const kpEquivalent = localSwitchGain * c.smcLambda;
     const kdEquivalent = c.mass * c.smcLambda - c.damping + localSwitchGain;
-    numerator = [kdEquivalent, kpEquivalent];
-    referenceNumerator = [c.mass * c.smcLambda + localSwitchGain, kpEquivalent];
-    denominator = [c.mass, c.damping, 0];
+    loopNumerator = [kdEquivalent, kpEquivalent];
+    referenceNumeratorRaw = [c.mass * c.smcLambda + localSwitchGain, kpEquivalent];
+    disturbanceNumeratorRaw = [1];
+    loopDenominator = [c.mass, c.damping, 0];
     exact = false;
   } else {
     const kpEquivalent = 0.55 * c.fuzzyGain / c.fuzzyEScale;
     const kdRule = 0.55 * c.fuzzyGain / c.fuzzyDScale;
     const kdEquivalent = kdRule + c.fuzzyVDamp;
-    numerator = [kdEquivalent, kpEquivalent];
-    referenceNumerator = [kdRule, kpEquivalent];
-    denominator = [c.mass, c.damping, 0];
+    loopNumerator = [kdEquivalent, kpEquivalent];
+    referenceNumeratorRaw = [kdRule, kpEquivalent];
+    disturbanceNumeratorRaw = [1];
+    loopDenominator = [c.mass, c.damping, 0];
     exact = false;
   }
 
-  const simplified = cancelCommonOriginFactors(numerator, denominator);
-  if (c.controllerType === "pid") referenceNumerator = simplified.numerator.slice();
+  const loopTransfer = cancelCommonOriginFactors(loopNumerator, loopDenominator);
+  const closedDenominatorRaw = addPolynomials(loopDenominator, loopNumerator);
+  const referenceTransfer = cancelCommonOriginFactors(referenceNumeratorRaw, closedDenominatorRaw);
+  const disturbanceTransfer = cancelCommonOriginFactors(disturbanceNumeratorRaw, closedDenominatorRaw);
+
   return {
-    ...simplified,
-    referenceNumerator: trimPolynomial(referenceNumerator),
-    closedDenominator: addPolynomials(simplified.denominator, simplified.numerator),
+    numerator: loopTransfer.numerator,
+    denominator: loopTransfer.denominator,
+    referenceNumerator: referenceTransfer.numerator,
+    closedDenominator: referenceTransfer.denominator,
+    disturbanceNumerator: disturbanceTransfer.numerator,
+    disturbanceDenominator: disturbanceTransfer.denominator,
     exact,
     controllerType: c.controllerType
   };
@@ -2148,7 +2501,9 @@ let marginDisplaySignature = "";
 function bodeFrequencyBounds(model) {
   const roots = [
     ...polynomialRoots(model.numerator),
-    ...polynomialRoots(model.denominator)
+    ...polynomialRoots(model.denominator),
+    ...polynomialRoots(model.closedDenominator),
+    ...polynomialRoots(model.disturbanceDenominator)
   ];
   const characteristicFrequencies = roots
     .map(complexMagnitude)
@@ -2274,18 +2629,21 @@ function buildAnalysisData(c) {
   const model = linearModelFor(c);
   const { logMin, logMax } = bodeFrequencyBounds(model);
   const bode = [];
-  let previousPhase = null;
+  const previousPhases = {
+    openLoop: null,
+    reference: null,
+    disturbance: null
+  };
 
-  for (let index = 0; index <= 480; index++) {
-    const logFrequency = logMin + (logMax - logMin) * index / 480;
-    const omega = 10 ** logFrequency;
+  const responseSample = (numerator, denominator, omega, mode) => {
     const jw = complex(0, omega);
     const response = complexDivide(
-      evaluatePolynomial(model.numerator, jw),
-      evaluatePolynomial(model.denominator, jw)
+      evaluatePolynomial(numerator, jw),
+      evaluatePolynomial(denominator, jw)
     );
     const magnitude = clamp(20 * Math.log10(Math.max(1e-12, complexMagnitude(response))), -180, 180);
     let phase = Math.atan2(response.im, response.re) * 180 / Math.PI;
+    const previousPhase = previousPhases[mode];
 
     if (previousPhase === null && phase > 90) {
       phase -= 360;
@@ -2293,8 +2651,36 @@ function buildAnalysisData(c) {
       while (phase - previousPhase > 180) phase -= 360;
       while (phase - previousPhase < -180) phase += 360;
     }
-    previousPhase = phase;
-    bode.push({ omega, logFrequency, magnitude, phase });
+    previousPhases[mode] = phase;
+    return { magnitude, phase };
+  };
+
+  for (let index = 0; index <= 480; index++) {
+    const logFrequency = logMin + (logMax - logMin) * index / 480;
+    const omega = 10 ** logFrequency;
+    const openLoop = responseSample(model.numerator, model.denominator, omega, "openLoop");
+    const reference = responseSample(
+      model.referenceNumerator,
+      model.closedDenominator,
+      omega,
+      "reference"
+    );
+    const disturbance = responseSample(
+      model.disturbanceNumerator,
+      model.disturbanceDenominator,
+      omega,
+      "disturbance"
+    );
+    bode.push({
+      omega,
+      logFrequency,
+      magnitude: openLoop.magnitude,
+      phase: openLoop.phase,
+      referenceMagnitude: reference.magnitude,
+      referencePhase: reference.phase,
+      disturbanceMagnitude: disturbance.magnitude,
+      disturbancePhase: disturbance.phase
+    });
   }
 
   const rootLocus = buildRootLocus(model);
@@ -2318,7 +2704,15 @@ function analysisDataFor(c) {
   const signature = [
     ...model.numerator,
     "|",
-    ...model.denominator
+    ...model.denominator,
+    "|",
+    ...model.referenceNumerator,
+    "|",
+    ...model.closedDenominator,
+    "|",
+    ...model.disturbanceNumerator,
+    "|",
+    ...model.disturbanceDenominator
   ].join(",");
 
   if (!analysisCache || analysisCache.signature !== signature) {
@@ -2336,7 +2730,11 @@ function updateTransferFunctionDisplay(data) {
     "|",
     ...data.model.denominator,
     "|",
-    ...data.model.referenceNumerator
+    ...data.model.referenceNumerator,
+    "|",
+    ...data.model.disturbanceNumerator,
+    "|",
+    ...data.model.disturbanceDenominator
   ].join(",");
   if (displaySignature === transferDisplaySignature) return;
   transferDisplaySignature = displaySignature;
@@ -2346,6 +2744,8 @@ function updateTransferFunctionDisplay(data) {
   const denominator = polynomialToText(data.model.denominator);
   const referenceNumerator = polynomialToText(data.model.referenceNumerator);
   const closedDenominator = polynomialToText(data.model.closedDenominator);
+  const disturbanceNumerator = polynomialToText(data.model.disturbanceNumerator);
+  const disturbanceDenominator = polynomialToText(data.model.disturbanceDenominator);
   const isClassicalUnityFeedback =
     data.model.numerator.length === data.model.referenceNumerator.length &&
     data.model.numerator.every((value, index) =>
@@ -2381,11 +2781,20 @@ function updateTransferFunctionDisplay(data) {
       </div>
       <div class="equation-definition">${textFor("closedLoopDefinition")}</div>
     </div>
+    <div class="transfer-block">
+      <b>${textFor("disturbanceClosedLoopLabel")}</b>
+      <div class="display-equation">
+        <span>T<sub>xd</sub>(s)</span><span>=</span>
+        ${fractionHtml("X(s)", "D(s)")}<span>=</span>
+        ${fractionHtml("G(s)", "1 + C<sub>eq</sub>(s)G(s)")}<span>=</span>
+        ${fractionHtml(disturbanceNumerator, disturbanceDenominator)}
+      </div>
+      <div class="equation-definition">${textFor("disturbanceClosedLoopDefinition")}</div>
+    </div>
     <div class="equation-note">${analysisNote}</div>
   `;
 
   $("analysisModelBode").innerHTML = markup;
-  $("analysisModelPoleZero").innerHTML = markup;
 }
 
 function formatFrequency(value) {
@@ -2417,6 +2826,132 @@ function updateMarginDisplay(data) {
   $("gainMarginFrequency").textContent = Number.isFinite(gm.margin)
     ? `${textFor("atPhaseCrossover")} = ${formatFrequency(gm.omega)} rad/s`
     : textFor("noPhaseCrossover");
+}
+
+function transferResponseAt(numerator, denominator, omega) {
+  const jw = complex(0, omega);
+  const response = complexDivide(
+    evaluatePolynomial(numerator, jw),
+    evaluatePolynomial(denominator, jw)
+  );
+  const gain = complexMagnitude(response);
+  return {
+    gain,
+    magnitude: 20 * Math.log10(Math.max(1e-12, gain)),
+    phase: Math.atan2(response.im, response.re) * 180 / Math.PI
+  };
+}
+
+function bodeModeDefinition(model, mode) {
+  if (mode === "reference") {
+    return {
+      title: textFor("bodeModeReference"),
+      magnitudeKey: "referenceMagnitude",
+      phaseKey: "referencePhase",
+      numerator: model.referenceNumerator,
+      denominator: model.closedDenominator
+    };
+  }
+  if (mode === "openLoop") {
+    return {
+      title: textFor("bodeModeOpenLoop"),
+      magnitudeKey: "magnitude",
+      phaseKey: "phase",
+      numerator: model.numerator,
+      denominator: model.denominator
+    };
+  }
+  return {
+    title: textFor("bodeModeDisturbance"),
+    magnitudeKey: "disturbanceMagnitude",
+    phaseKey: "disturbancePhase",
+    numerator: model.disturbanceNumerator,
+    denominator: model.disturbanceDenominator
+  };
+}
+
+function periodicDisturbanceInfo(c) {
+  const periodicTypes = ["sin", "cos", "triangle", "square"];
+  if (!periodicTypes.includes(c.distType)) return null;
+  if (!(c.distFreq > 0)) return { invalidFrequency: true };
+
+  let fundamentalAmplitude = Math.abs(c.distAmp);
+  let estimateNote = textFor("sinusoidalEstimate");
+  if (c.distType === "square") {
+    fundamentalAmplitude *= 4 / Math.PI;
+    estimateNote = textFor("fundamentalEstimate");
+  } else if (c.distType === "triangle") {
+    fundamentalAmplitude *= 8 / (Math.PI * Math.PI);
+    estimateNote = textFor("fundamentalEstimate");
+  }
+
+  return {
+    omega: 2 * Math.PI * c.distFreq,
+    period: 1 / c.distFreq,
+    fundamentalAmplitude,
+    estimateNote
+  };
+}
+
+function measuredPositionAmplitude(period) {
+  if (!Number.isFinite(period) || period <= 0 || s.hist.length < 3) return null;
+  const windowStart = s.t - 2 * period;
+  const samples = s.hist.filter(point => point.t >= windowStart && Number.isFinite(point.x));
+  if (samples.length < 3 || samples[samples.length - 1].t - samples[0].t < 1.8 * period) return null;
+  const positions = samples.map(point => point.x);
+  return (Math.max(...positions) - Math.min(...positions)) / 2;
+}
+
+function updateFrequencyComparison(data, c) {
+  const mode = $("bodeResponseType").value;
+  $("bodeResponseTitle").textContent = bodeModeDefinition(data.model, mode).title;
+  $("marginContextNote").textContent = textFor(
+    mode === "openLoop" ? "marginContextOpen" : "marginContextClosed"
+  );
+  $("bodeFrequencyConversion").textContent = textFor("frequencyConversionBase");
+
+  const info = periodicDisturbanceInfo(c);
+  if (!info) {
+    $("disturbanceFrequencyValue").textContent = "—";
+    $("disturbanceFrequencyNote").textContent = textFor("noSingleDisturbanceFrequency");
+    $("disturbanceGainValue").textContent = "—";
+    $("disturbancePredictionValue").textContent = "—";
+    $("disturbancePredictionNote").textContent = textFor("noSingleDisturbanceFrequency");
+    $("disturbanceObservedValue").textContent = "—";
+    $("disturbanceObservedNote").textContent = textFor("noSingleDisturbanceFrequency");
+    return;
+  }
+  if (info.invalidFrequency) {
+    $("disturbanceFrequencyValue").textContent = "0 Hz";
+    $("disturbanceFrequencyNote").textContent = textFor("zeroDisturbanceFrequency");
+    $("disturbanceGainValue").textContent = "—";
+    $("disturbancePredictionValue").textContent = "—";
+    $("disturbancePredictionNote").textContent = textFor("zeroDisturbanceFrequency");
+    $("disturbanceObservedValue").textContent = "—";
+    $("disturbanceObservedNote").textContent = textFor("zeroDisturbanceFrequency");
+    return;
+  }
+
+  const response = transferResponseAt(
+    data.model.disturbanceNumerator,
+    data.model.disturbanceDenominator,
+    info.omega
+  );
+  const predictedAmplitude = info.fundamentalAmplitude * response.gain;
+  const observedAmplitude = measuredPositionAmplitude(info.period);
+
+  $("disturbanceFrequencyValue").textContent = `${formatFrequency(c.distFreq)} Hz`;
+  $("disturbanceFrequencyNote").textContent = `ωd = ${formatFrequency(info.omega)} rad/s`;
+  $("bodeFrequencyConversion").textContent = currentLanguage === "en"
+    ? `Disturbance conversion: f_d = ${formatFrequency(c.distFreq)} Hz × 2π = ω_d ${formatFrequency(info.omega)} rad/s. The horizontal axis is logarithmic.`
+    : `目前擾動換算：f_d = ${formatFrequency(c.distFreq)} Hz × 2π = ω_d ${formatFrequency(info.omega)} rad/s。橫軸採對數刻度。`;
+  $("disturbanceGainValue").textContent = `${response.magnitude.toFixed(2)} dB`;
+  $("disturbancePredictionValue").textContent = fmt(predictedAmplitude);
+  $("disturbancePredictionNote").textContent = info.estimateNote;
+  $("disturbanceObservedValue").textContent = Number.isFinite(observedAmplitude) ? fmt(observedAmplitude) : "—";
+  $("disturbanceObservedNote").textContent = Number.isFinite(observedAmplitude)
+    ? textFor("measuredFromRecentCycles")
+    : textFor("needTwoCycles");
 }
 
 function chartIsVisible(canvas) {
@@ -2515,27 +3050,36 @@ function drawBodeSection(ctx, data, bounds, valueKey, range, color, label, logMi
   }
 }
 
-function drawBodePlot(data) {
+function drawBodePlot(data, c) {
   const canvas = $("bodeChart");
   if (!chartIsVisible(canvas)) return;
   const { ctx, w, h } = setupCanvas(canvas);
   if (w < 120 || h < 120) return;
 
+  const mode = $("bodeResponseType").value;
+  const modeDefinition = bodeModeDefinition(data.model, mode);
+  const plotData = data.bode.map(point => ({
+    omega: point.omega,
+    logFrequency: point.logFrequency,
+    magnitude: point[modeDefinition.magnitudeKey],
+    phase: point[modeDefinition.phaseKey]
+  }));
+
   const left = 64;
   const right = w - 16;
   const top = 28;
-  const bottom = h - 43;
+  const bottom = h - 58;
   const gap = 45;
   const sectionHeight = (bottom - top - gap) / 2;
   const magnitudeBounds = { left, right, top, bottom: top + sectionHeight };
   const phaseBounds = { left, right, top: top + sectionHeight + gap, bottom };
-  const magnitudeRange = roundedPlotRange([...data.bode.map(point => point.magnitude), 0], 20, 40);
-  const phaseRange = roundedPlotRange([...data.bode.map(point => point.phase), -180], 45, 90);
+  const magnitudeRange = roundedPlotRange([...plotData.map(point => point.magnitude), 0], 20, 40);
+  const phaseRange = roundedPlotRange([...plotData.map(point => point.phase), -180], 45, 90);
 
   ctx.clearRect(0, 0, w, h);
   drawBodeSection(
     ctx,
-    data.bode,
+    plotData,
     magnitudeBounds,
     "magnitude",
     magnitudeRange,
@@ -2547,7 +3091,7 @@ function drawBodePlot(data) {
   );
   drawBodeSection(
     ctx,
-    data.bode,
+    plotData,
     phaseBounds,
     "phase",
     phaseRange,
@@ -2595,9 +3139,30 @@ function drawBodePlot(data) {
     ctx.restore();
   };
 
-  drawMarginMarker(data.margins.phaseMargin, "#7c8d2f", "ωgc / PM", 5);
-  if (Number.isFinite(data.margins.gainMargin.margin)) {
-    drawMarginMarker(data.margins.gainMargin, "#d79b2f", "ωpc / GM", 20);
+  if (mode === "openLoop") {
+    drawMarginMarker(data.margins.phaseMargin, "#7c8d2f", "ωgc / PM", 5);
+    if (Number.isFinite(data.margins.gainMargin.margin)) {
+      drawMarginMarker(data.margins.gainMargin, "#d79b2f", "ωpc / GM", 20);
+    }
+  }
+
+  const disturbanceInfo = periodicDisturbanceInfo(c);
+  if (disturbanceInfo && !disturbanceInfo.invalidFrequency) {
+    const markerLogFrequency = Math.log10(disturbanceInfo.omega);
+    if (markerLogFrequency >= data.logMin && markerLogFrequency <= data.logMax) {
+      const nearest = plotData.reduce((best, point) =>
+        Math.abs(point.logFrequency - markerLogFrequency) < Math.abs(best.logFrequency - markerLogFrequency)
+          ? point
+          : best
+      );
+      const marker = {
+        logFrequency: markerLogFrequency,
+        magnitude: nearest.magnitude,
+        phase: nearest.phase
+      };
+      const markerLabel = `f_d ${formatFrequency(c.distFreq)} Hz = ω_d ${formatFrequency(disturbanceInfo.omega)} rad/s`;
+      drawMarginMarker(marker, "#7a4da3", markerLabel, mode === "openLoop" ? 35 : 5);
+    }
   }
 
   ctx.fillStyle = "#666";
@@ -2612,7 +3177,12 @@ function drawBodePlot(data) {
     const label = value >= 10000 || value < 0.001
       ? `1e${exponent}`
       : (value < 1 ? value.toFixed(-exponent) : value.toFixed(0));
-    ctx.fillText(label, x, bottom + 7);
+    ctx.fillText(label, x, bottom + 6);
+    ctx.font = `9px ${UI_FONT_FAMILY}`;
+    ctx.fillStyle = "#7a4da3";
+    ctx.fillText(formatFrequency(value / (2 * Math.PI)), x, bottom + 20);
+    ctx.font = `11px ${UI_FONT_FAMILY}`;
+    ctx.fillStyle = "#666";
   }
   ctx.textAlign = "right";
   ctx.fillText(textFor("frequencyAxis"), right, h - 16);
@@ -2769,6 +3339,7 @@ function drawControlAnalysis(c) {
   const data = analysisDataFor(c);
   updateTransferFunctionDisplay(data);
   updateMarginDisplay(data);
+  updateFrequencyComparison(data, c);
 
   const bodeCanvas = $("bodeChart");
   const poleZeroCanvas = $("poleZeroChart");
@@ -2777,6 +3348,9 @@ function drawControlAnalysis(c) {
   const renderSignature = [
     analysisCache.signature,
     currentLanguage,
+    $("bodeResponseType").value,
+    c.distType,
+    c.distFreq,
     $("rootLocusTrail").checked,
     chartIsVisible(bodeCanvas),
     Math.round(bodeRect.width),
@@ -2788,7 +3362,7 @@ function drawControlAnalysis(c) {
 
   if (renderSignature === analysisRenderSignature) return;
   analysisRenderSignature = renderSignature;
-  drawBodePlot(data);
+  drawBodePlot(data, c);
   drawPoleZeroPlot(data);
 }
 
@@ -2960,6 +3534,23 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
+let analysisHelpReturnFocus = null;
+
+function openAnalysisHelp() {
+  analysisHelpReturnFocus = document.activeElement;
+  $("analysisHelpModal").classList.remove("is-hidden");
+  $("analysisHelpModal").setAttribute("aria-hidden", "false");
+  $("analysisHelpClose").focus();
+}
+
+function closeAnalysisHelp() {
+  $("analysisHelpModal").classList.add("is-hidden");
+  $("analysisHelpModal").setAttribute("aria-hidden", "true");
+  if (analysisHelpReturnFocus && typeof analysisHelpReturnFocus.focus === "function") {
+    analysisHelpReturnFocus.focus();
+  }
+}
+
 function presetPID(kp, ki, kd, damping) {
   $("controllerType").value = "pid";
   $("kp").value = kp;
@@ -3004,6 +3595,20 @@ document.querySelectorAll("[data-lang-choice]").forEach(button => {
 
 $("znKu").oninput = () => updateZNPreview("pid");
 $("znPu").oninput = () => updateZNPreview("pid");
+$("analysisHelpButton").onclick = openAnalysisHelp;
+$("analysisHelpClose").onclick = closeAnalysisHelp;
+$("analysisHelpModal").onclick = event => {
+  if (event.target === $("analysisHelpModal")) closeAnalysisHelp();
+};
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !$("analysisHelpModal").classList.contains("is-hidden")) {
+    closeAnalysisHelp();
+  }
+});
+$("bodeResponseType").onchange = () => {
+  analysisRenderSignature = "";
+  draw();
+};
 $("rootLocusTrail").onchange = draw;
 
 compilePID();
